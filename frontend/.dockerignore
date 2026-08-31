@@ -1,0 +1,37 @@
+# .dockerignore del frontend.
+# Excluye artefactos locales para que no se copien al contexto de build de
+# Docker. Esto acelera el build y evita sobrescribir las dependencias que se
+# instalan dentro del contenedor (node_modules).
+
+# Dependencias instaladas localmente (se reinstalan dentro del contenedor).
+node_modules
+
+# Salidas de build de Vite.
+dist
+build
+
+# Cache de Vite.
+.vite
+.cache
+
+# Logs.
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs
+
+# Variables de entorno locales (las aporta docker-compose/.env).
+.env.local
+.env.*.local
+
+# Metadatos y configuracion de editores/control de versiones.
+.git
+.gitignore
+.DS_Store
+.vscode
+.idea
+
+# El propio Dockerfile y este archivo no necesitan entrar al contexto.
+Dockerfile
+.dockerignore

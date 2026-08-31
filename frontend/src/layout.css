@@ -1,0 +1,183 @@
+/*
+  Estilos del layout general y del menu lateral (Tarea 14).
+  Reutiliza las variables CSS (tokens) definidas en index.css (:root).
+  Valores y estructura tomados de la seccion "Visual Style" del design.md:
+    - Layout general: sidebar oscuro fijo a la izquierda + area de contenido clara.
+    - Estilo del menu lateral: marca arriba, etiqueta "Menu", items con icono,
+      estado activo (fondo primario + barra de acento a la izquierda), hover.
+*/
+
+/* ============================================================
+   Layout general
+   ============================================================ */
+
+/* Contenedor raiz: sidebar a la izquierda + contenido a la derecha */
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Area de contenido (a la derecha del sidebar) con fondo claro */
+.contenido {
+  flex: 1;
+  min-width: 0; /* evita desbordes horizontales del contenido */
+  background-color: var(--color-content-bg);
+  /* Deja hueco para el sidebar fijo */
+  margin-left: var(--sidebar-width);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Barra superior (topbar) con el breadcrumb de la seccion actual */
+.topbar {
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-4) var(--space-5);
+}
+
+.topbar__breadcrumb {
+  margin: 0;
+  font-size: var(--font-size-page-title);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+}
+
+/* Texto tenue del prefijo del breadcrumb ("Gestion de Pedidos >") */
+.topbar__breadcrumb-prefijo {
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-normal);
+}
+
+/* Contenedor donde se renderiza la seccion activa */
+.seccion {
+  padding: var(--space-5);
+  flex: 1;
+}
+
+/* ============================================================
+   Menu lateral (componente MenuLateral)
+   ============================================================ */
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background-color: var(--color-sidebar-bg);
+  color: var(--color-sidebar-text);
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4) var(--space-3);
+  overflow-y: auto;
+}
+
+/* Marca (arriba): icono + nombre de la app */
+.sidebar__marca {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-2) var(--space-4);
+  color: var(--color-sidebar-text);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-card-title);
+}
+
+.sidebar__marca-icono {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+/* Navegacion principal ocupa el espacio disponible para empujar "Soporte" abajo */
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1;
+}
+
+/* Etiqueta tenue de grupo ("Menu") */
+.sidebar__grupo-label {
+  margin: var(--space-2) var(--space-2) var(--space-1);
+  color: var(--color-sidebar-text-muted);
+  font-size: var(--font-size-small);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Item de navegacion: icono a la izquierda + etiqueta */
+.sidebar__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-3);
+  border: none;
+  /* Borde izquierdo transparente para reservar el espacio de la barra de acento */
+  border-left: 3px solid transparent;
+  background-color: transparent;
+  color: var(--color-sidebar-text);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body);
+  text-align: left;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.sidebar__item-icono {
+  font-size: 1.125rem;
+  line-height: 1;
+  width: 1.25rem;
+  text-align: center;
+}
+
+/* Hover de items NO activos: fondo ligeramente mas claro */
+.sidebar__item:not(.sidebar__item--activo):hover {
+  background-color: var(--color-sidebar-bg-alt);
+}
+
+/* Foco visible por teclado (anillo de acento) */
+.sidebar__item:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+/* Estado activo: fondo primario, texto blanco y barra de acento a la izquierda.
+   El estado no depende solo del color gracias a la barra de acento. */
+.sidebar__item--activo {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  border-left-color: var(--color-accent);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Pie del sidebar: "Soporte" anclado abajo, separado del grupo principal */
+.sidebar__pie {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-sidebar-bg-alt);
+}
+
+/* ============================================================
+   Placeholder de seccion (temporal, Tarea 14)
+   Se reemplaza por los componentes reales en las Tareas 15-19.
+   ============================================================ */
+
+.placeholder-card {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-5);
+}
+
+.placeholder-card__titulo {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-card-title);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.placeholder-card__texto {
+  margin: 0;
+  color: var(--color-text-secondary);
+}

@@ -1,0 +1,160 @@
+/*
+  Estilos de la seccion Pedidos (Tarea 18).
+  Reutiliza las variables CSS (tokens) definidas en index.css (:root):
+  colores de superficie, bordes, foco, primario, acento, error, radios,
+  sombras, tipografia y espaciado. No edita CSS globales; solo define
+  clases propias (CSS Module).
+*/
+
+/* Contenedor vertical de las tarjetas de la seccion (formulario + lista). */
+.pedidos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* Tarjeta blanca reutilizable (formulario y lista). */
+.tarjeta {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-5);
+}
+
+/* Titulo de tarjeta ("Nuevo pedido" / "Pedidos registrados"). */
+.tituloTarjeta {
+  margin: 0 0 var(--space-4);
+  font-size: var(--font-size-card-title);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+/* Formulario de creacion: campos en columna. */
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Cada campo agrupa la etiqueta ENCIMA del control (estilo de la guia). */
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* Etiqueta encima del control, en texto secundario. */
+.etiqueta {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Inputs y selects con borde sutil y esquinas redondeadas. */
+.input,
+.select {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body);
+  color: var(--color-text);
+  background-color: var(--color-surface);
+}
+
+/* Foco visible con anillo de acento (cian). */
+.input:focus,
+.select:focus {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+  border-color: var(--color-accent);
+}
+
+/* Previsualizacion del Total, destacada en negrita con color de acento. */
+.total {
+  font-size: var(--font-size-card-title);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-accent);
+}
+
+/* Fila de acciones del formulario (boton crear). */
+.acciones {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+/* Boton primario azul (Crear pedido). */
+.botonPrimario {
+  padding: var(--space-2) var(--space-5);
+  border: none;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-primary);
+  color: #ffffff;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.botonPrimario:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.botonPrimario:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+/* Mensaje de error de validacion, en rojo y debajo del formulario. */
+.error {
+  margin: 0;
+  color: var(--color-error);
+  font-size: var(--font-size-small);
+}
+
+/* Tabla de pedidos dentro de la tarjeta. */
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Encabezado de tabla en gris y tamano pequeno. */
+.tabla th {
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-medium);
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* Celdas con separador sutil entre filas. */
+.tabla td {
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+/* Selector de estado dentro de cada fila. */
+.selectEstado {
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-small);
+  color: var(--color-text);
+  background-color: var(--color-surface);
+}
+
+.selectEstado:focus {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+  border-color: var(--color-accent);
+}
+
+/* Mensaje cuando no hay pedidos registrados. */
+.vacio {
+  margin: 0;
+  color: var(--color-text-secondary);
+}

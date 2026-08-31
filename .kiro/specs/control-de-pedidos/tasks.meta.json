@@ -1,0 +1,626 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1. Preparar la estructura del proyecto backend": [
+      {
+        "executionId": "a48032b2-a6ea-4c86-89a9-a2771ddea79a",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788119112120
+      },
+      {
+        "executionId": "a48032b2-a6ea-4c86-89a9-a2771ddea79a",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788119185289
+      }
+    ],
+    "2.1 Implementar `database.py` (conexión SQLAlchemy)": [
+      {
+        "executionId": "226e6e4a-f58f-442c-8b26-eb2b8444c23b",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788119268704
+      },
+      {
+        "executionId": "226e6e4a-f58f-442c-8b26-eb2b8444c23b",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788119467167
+      }
+    ],
+    "2.2 Implementar los modelos ORM en `models.py`": [
+      {
+        "executionId": "226e6e4a-f58f-442c-8b26-eb2b8444c23b",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788119471364
+      },
+      {
+        "executionId": "226e6e4a-f58f-442c-8b26-eb2b8444c23b",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788119611487
+      }
+    ],
+    "2. Configurar la conexión a la base de datos y el esquema": [
+      {
+        "executionId": "226e6e4a-f58f-442c-8b26-eb2b8444c23b",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788119611574
+      }
+    ],
+    "3. Definir los esquemas Pydantic en `schemas.py`": [
+      {
+        "executionId": "33f2d138-6a0c-4a0f-a69f-766e803f0099",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788119639943
+      },
+      {
+        "executionId": "33f2d138-6a0c-4a0f-a69f-766e803f0099",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788119765565
+      }
+    ],
+    "4.1 Implementar `calcular_total` y `es_estado_valido`": [
+      {
+        "executionId": "4a1197ad-1090-459b-86eb-5c6562fe0c10",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788119851786
+      },
+      {
+        "executionId": "4a1197ad-1090-459b-86eb-5c6562fe0c10",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788120883133
+      }
+    ],
+    "12. Preparar la estructura del proyecto frontend": [
+      {
+        "executionId": "4a1197ad-1090-459b-86eb-5c6562fe0c10",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788119853131
+      },
+      {
+        "executionId": "4a1197ad-1090-459b-86eb-5c6562fe0c10",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788120881809
+      }
+    ],
+    "4.5 Implementar `producto_seleccionable` y validaciones de campos": [
+      {
+        "executionId": "4a1197ad-1090-459b-86eb-5c6562fe0c10",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788119858203
+      },
+      {
+        "executionId": "4a1197ad-1090-459b-86eb-5c6562fe0c10",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788120884561
+      }
+    ],
+    "4.11 Implementar `resumir_reporte`": [
+      {
+        "executionId": "4a1197ad-1090-459b-86eb-5c6562fe0c10",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788119859598
+      },
+      {
+        "executionId": "4a1197ad-1090-459b-86eb-5c6562fe0c10",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788120885541
+      }
+    ],
+    "4. Implementar la capa de servicios pura en `services.py`": [
+      {
+        "executionId": "4a1197ad-1090-459b-86eb-5c6562fe0c10",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788120885599
+      }
+    ],
+    "4.2 Prueba de propiedad para `calcular_total`": [
+      {
+        "executionId": "4a1197ad-1090-459b-86eb-5c6562fe0c10",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788120890734
+      }
+    ],
+    "4.3 Prueba de propiedad para `es_estado_valido` (estado válido round trip)": [
+      {
+        "executionId": "4a1197ad-1090-459b-86eb-5c6562fe0c10",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788120892246
+      }
+    ],
+    "4.4 Prueba de propiedad para `es_estado_valido` (estado inválido rechazado)": [
+      {
+        "executionId": "4a1197ad-1090-459b-86eb-5c6562fe0c10",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788120893961
+      }
+    ],
+    "4.6 Prueba de propiedad para productos seleccionables": [
+      {
+        "executionId": "4a1197ad-1090-459b-86eb-5c6562fe0c10",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788120895482
+      }
+    ],
+    "4.7 Prueba de propiedad para cantidad fuera de rango": [
+      {
+        "executionId": "4a1197ad-1090-459b-86eb-5c6562fe0c10",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788120896900
+      }
+    ],
+    "4.8 Prueba de propiedad para campos obligatorios vacíos o con espacios": [
+      {
+        "executionId": "4a1197ad-1090-459b-86eb-5c6562fe0c10",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788120898361
+      }
+    ],
+    "4.9 Prueba de propiedad para longitud máxima excedida": [
+      {
+        "executionId": "4a1197ad-1090-459b-86eb-5c6562fe0c10",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788120899637
+      }
+    ],
+    "4.10 Prueba de propiedad para precio fuera de rango": [
+      {
+        "executionId": "4a1197ad-1090-459b-86eb-5c6562fe0c10",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788120901094
+      }
+    ],
+    "4.12 Prueba de propiedad para el filtrado por fecha del reporte": [
+      {
+        "executionId": "4a1197ad-1090-459b-86eb-5c6562fe0c10",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788120902468
+      }
+    ],
+    "4.13 Prueba de propiedad para conteo y suma del reporte": [
+      {
+        "executionId": "4a1197ad-1090-459b-86eb-5c6562fe0c10",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788120903853
+      }
+    ],
+    "6.1 Crear `routers/clientes.py` con GET, POST, GET/{id}, PUT/{id}": [
+      {
+        "executionId": "de06fd70-c477-4dcd-84ef-907f65abdf40",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788120990833
+      },
+      {
+        "executionId": "de06fd70-c477-4dcd-84ef-907f65abdf40",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788121369473
+      }
+    ],
+    "6.2 Pruebas por ejemplo del CRUD de clientes": [
+      {
+        "executionId": "de06fd70-c477-4dcd-84ef-907f65abdf40",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788120991870
+      },
+      {
+        "executionId": "de06fd70-c477-4dcd-84ef-907f65abdf40",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788121368232
+      }
+    ],
+    "6. Implementar el router de clientes": [
+      {
+        "executionId": "de06fd70-c477-4dcd-84ef-907f65abdf40",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788121369544
+      }
+    ],
+    "7.1 Crear `routers/productos.py` con GET (con `?solo_disponibles=true`), POST, GET/{id}, PUT/{id}": [
+      {
+        "executionId": "89837701-f562-4a48-b44a-502102e858e2",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788121494769
+      },
+      {
+        "executionId": "89837701-f562-4a48-b44a-502102e858e2",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788122076104
+      }
+    ],
+    "7.2 Prueba de propiedad: disponible verdadero por defecto": [
+      {
+        "executionId": "89837701-f562-4a48-b44a-502102e858e2",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788121496228
+      },
+      {
+        "executionId": "89837701-f562-4a48-b44a-502102e858e2",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788122074915
+      }
+    ],
+    "7.3 Pruebas por ejemplo del CRUD de productos": [
+      {
+        "executionId": "89837701-f562-4a48-b44a-502102e858e2",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788121497578
+      },
+      {
+        "executionId": "89837701-f562-4a48-b44a-502102e858e2",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788122072958
+      }
+    ],
+    "8.1 Crear `routers/pedidos.py` con GET, POST y PATCH/{id}/estado": [
+      {
+        "executionId": "89837701-f562-4a48-b44a-502102e858e2",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788121499456
+      },
+      {
+        "executionId": "89837701-f562-4a48-b44a-502102e858e2",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788122071530
+      }
+    ],
+    "8.2 Prueba de propiedad: precio unitario vigente e inmutable": [
+      {
+        "executionId": "89837701-f562-4a48-b44a-502102e858e2",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788121500835
+      },
+      {
+        "executionId": "89837701-f562-4a48-b44a-502102e858e2",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788122070155
+      }
+    ],
+    "8.3 Prueba de propiedad: pedido nace Pendiente con fecha de hoy": [
+      {
+        "executionId": "89837701-f562-4a48-b44a-502102e858e2",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788121502269
+      },
+      {
+        "executionId": "89837701-f562-4a48-b44a-502102e858e2",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788122068738
+      }
+    ],
+    "8.4 Pruebas por ejemplo de pedidos": [
+      {
+        "executionId": "89837701-f562-4a48-b44a-502102e858e2",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788121503571
+      },
+      {
+        "executionId": "89837701-f562-4a48-b44a-502102e858e2",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788122068481
+      }
+    ],
+    "8. Implementar el router de pedidos": [
+      {
+        "executionId": "89837701-f562-4a48-b44a-502102e858e2",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788122071582
+      }
+    ],
+    "7. Implementar el router de productos": [
+      {
+        "executionId": "89837701-f562-4a48-b44a-502102e858e2",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788122076155
+      }
+    ],
+    "9.2 Pruebas por ejemplo del reporte diario": [
+      {
+        "executionId": "7b02ff15-b319-4b32-ac3a-c4c5605757b2",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788122199353
+      },
+      {
+        "executionId": "7b02ff15-b319-4b32-ac3a-c4c5605757b2",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788122428712
+      }
+    ],
+    "9.1 Crear `routers/reporte.py` con GET `/api/reporte-diario`": [
+      {
+        "executionId": "7b02ff15-b319-4b32-ac3a-c4c5605757b2",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788122200294
+      },
+      {
+        "executionId": "7b02ff15-b319-4b32-ac3a-c4c5605757b2",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788122430212
+      }
+    ],
+    "9. Implementar el router de reporte diario": [
+      {
+        "executionId": "7b02ff15-b319-4b32-ac3a-c4c5605757b2",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788122430278
+      }
+    ],
+    "10.1 Implementar `main.py`": [
+      {
+        "executionId": "c0855d25-5ddc-4f6e-89a2-c1386255b27a",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788122626238
+      },
+      {
+        "executionId": "c0855d25-5ddc-4f6e-89a2-c1386255b27a",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788124183557
+      }
+    ],
+    "10. Ensamblar la aplicación FastAPI": [
+      {
+        "executionId": "c0855d25-5ddc-4f6e-89a2-c1386255b27a",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788124183725
+      }
+    ],
+    "13.1 Implementar `src/api.js`": [
+      {
+        "executionId": "e8293f96-3395-4352-8f6d-bb5e13de06a6",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788124470075
+      },
+      {
+        "executionId": "e8293f96-3395-4352-8f6d-bb5e13de06a6",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788132122614
+      }
+    ],
+    "13.2 Pruebas del cliente HTTP": [
+      {
+        "executionId": "e8293f96-3395-4352-8f6d-bb5e13de06a6",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788124470132
+      },
+      {
+        "executionId": "e8293f96-3395-4352-8f6d-bb5e13de06a6",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788132123724
+      }
+    ],
+    "11. Checkpoint - Verificar el backend completo": [
+      {
+        "executionId": "e8293f96-3395-4352-8f6d-bb5e13de06a6",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788124510500
+      }
+    ],
+    "13. Implementar el cliente HTTP centralizado": [
+      {
+        "executionId": "e8293f96-3395-4352-8f6d-bb5e13de06a6",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788132122683
+      }
+    ],
+    "14.2 Pruebas del menú lateral y sección activa": [
+      {
+        "executionId": "b2e7c6c0-db96-49d9-853d-fb323c23946d",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788132158035
+      },
+      {
+        "executionId": "b2e7c6c0-db96-49d9-853d-fb323c23946d",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788132413807
+      }
+    ],
+    "14.1 Implementar `App.jsx` y `MenuLateral`": [
+      {
+        "executionId": "b2e7c6c0-db96-49d9-853d-fb323c23946d",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788132159042
+      },
+      {
+        "executionId": "b2e7c6c0-db96-49d9-853d-fb323c23946d",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788132412761
+      }
+    ],
+    "14. Implementar el layout y el menú lateral": [
+      {
+        "executionId": "b2e7c6c0-db96-49d9-853d-fb323c23946d",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788132412895
+      }
+    ],
+    "15. Implementar la sección Inicio": [
+      {
+        "executionId": "f9a27ef3-82ac-4d8c-a94c-eee6cd41c5f4",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788132551778
+      },
+      {
+        "executionId": "f9a27ef3-82ac-4d8c-a94c-eee6cd41c5f4",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788135220461
+      }
+    ],
+    "16.1 Implementar `secciones/Clientes.jsx`": [
+      {
+        "executionId": "f9a27ef3-82ac-4d8c-a94c-eee6cd41c5f4",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788132553290
+      },
+      {
+        "executionId": "f9a27ef3-82ac-4d8c-a94c-eee6cd41c5f4",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788135221794
+      }
+    ],
+    "16.2 Pruebas de la sección Clientes": [
+      {
+        "executionId": "f9a27ef3-82ac-4d8c-a94c-eee6cd41c5f4",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788132554602
+      },
+      {
+        "executionId": "f9a27ef3-82ac-4d8c-a94c-eee6cd41c5f4",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788135223189
+      }
+    ],
+    "17. Implementar la sección Productos": [
+      {
+        "executionId": "f9a27ef3-82ac-4d8c-a94c-eee6cd41c5f4",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788132555881
+      },
+      {
+        "executionId": "f9a27ef3-82ac-4d8c-a94c-eee6cd41c5f4",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788135225336
+      }
+    ],
+    "18.1 Implementar `secciones/Pedidos.jsx`": [
+      {
+        "executionId": "f9a27ef3-82ac-4d8c-a94c-eee6cd41c5f4",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788132560917
+      },
+      {
+        "executionId": "f9a27ef3-82ac-4d8c-a94c-eee6cd41c5f4",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788135226089
+      }
+    ],
+    "18.2 Pruebas de la previsualización del total": [
+      {
+        "executionId": "f9a27ef3-82ac-4d8c-a94c-eee6cd41c5f4",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788132561924
+      },
+      {
+        "executionId": "f9a27ef3-82ac-4d8c-a94c-eee6cd41c5f4",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788135227341
+      }
+    ],
+    "19. Implementar la sección Reporte diario": [
+      {
+        "executionId": "f9a27ef3-82ac-4d8c-a94c-eee6cd41c5f4",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788132562805
+      },
+      {
+        "executionId": "f9a27ef3-82ac-4d8c-a94c-eee6cd41c5f4",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788135228321
+      }
+    ],
+    "16. Implementar la sección Clientes": [
+      {
+        "executionId": "f9a27ef3-82ac-4d8c-a94c-eee6cd41c5f4",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788135221888
+      }
+    ],
+    "18. Implementar la sección Pedidos": [
+      {
+        "executionId": "f9a27ef3-82ac-4d8c-a94c-eee6cd41c5f4",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788135226161
+      }
+    ],
+    "20. Aplicar la guía de estilo visual a formularios y tablas": [
+      {
+        "executionId": "561c3056-e337-4154-9c86-9c3f713374a6",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788135257761
+      },
+      {
+        "executionId": "561c3056-e337-4154-9c86-9c3f713374a6",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788135413734
+      }
+    ],
+    "21. Checkpoint - Verificar el frontend completo": [
+      {
+        "executionId": "561c3056-e337-4154-9c86-9c3f713374a6",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788135522336
+      }
+    ],
+    "22.1 Crear el `Dockerfile` y `.dockerignore` del backend": [
+      {
+        "executionId": "561c3056-e337-4154-9c86-9c3f713374a6",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788135528790
+      },
+      {
+        "executionId": "561c3056-e337-4154-9c86-9c3f713374a6",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788135672566
+      }
+    ],
+    "22.2 Crear el `Dockerfile` y `.dockerignore` del frontend": [
+      {
+        "executionId": "561c3056-e337-4154-9c86-9c3f713374a6",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788135530170
+      },
+      {
+        "executionId": "561c3056-e337-4154-9c86-9c3f713374a6",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788135673583
+      }
+    ],
+    "22.3 Crear `docker-compose.yml` y `.env` en la raíz": [
+      {
+        "executionId": "561c3056-e337-4154-9c86-9c3f713374a6",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788135531667
+      },
+      {
+        "executionId": "561c3056-e337-4154-9c86-9c3f713374a6",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788135675029
+      }
+    ],
+    "22. Contenerización con Docker": [
+      {
+        "executionId": "561c3056-e337-4154-9c86-9c3f713374a6",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788135675116
+      }
+    ],
+    "23.1 Script o guía de prueba de humo de `docker compose up`": [
+      {
+        "executionId": "561c3056-e337-4154-9c86-9c3f713374a6",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788135694770
+      },
+      {
+        "executionId": "561c3056-e337-4154-9c86-9c3f713374a6",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788135841447
+      }
+    ],
+    "23. Prueba de humo del despliegue": [
+      {
+        "executionId": "561c3056-e337-4154-9c86-9c3f713374a6",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788135841505
+      }
+    ],
+    "5. Checkpoint - Verificar la capa de servicios": [
+      {
+        "executionId": "561c3056-e337-4154-9c86-9c3f713374a6",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788135847559
+      }
+    ],
+    "24. Checkpoint final - Verificar todo el sistema": [
+      {
+        "executionId": "561c3056-e337-4154-9c86-9c3f713374a6",
+        "chatSessionId": "sess_b21c5666-6d92-4ba4-820b-0b0efd1c6ffa",
+        "timestamp": 1788135856168
+      }
+    ]
+  }
+}

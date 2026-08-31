@@ -1,0 +1,23 @@
+# Variables de entorno con credenciales reales: NO versionar.
+# Usa .env.example como plantilla.
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.hypothesis/
+
+# Node / frontend
+node_modules/
+dist/
+build/
+
+# Editores / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

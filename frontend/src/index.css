@@ -1,0 +1,68 @@
+/*
+  Estilos globales y guia de estilo del Control de Pedidos.
+  Las variables CSS (tokens) viven en :root para poder reutilizarlas en
+  todos los componentes (menu lateral, tarjetas, formularios y tablas).
+  Valores tomados de la seccion "Visual Style" del design.md.
+*/
+
+:root {
+  /* --- Colores --- */
+  --color-sidebar-bg: #0F172A;         /* Fondo del menu lateral (slate oscuro) */
+  --color-sidebar-bg-alt: #1E293B;     /* Variante del sidebar (hover de items) */
+  --color-sidebar-text: #CBD5E1;       /* Texto e iconos del menu */
+  --color-sidebar-text-muted: #64748B; /* Etiquetas tenues del menu */
+  --color-content-bg: #F1F5F9;         /* Fondo del area de contenido */
+  --color-surface: #FFFFFF;            /* Fondo de tarjetas, formularios y filas */
+  --color-accent: #06B6D4;             /* Acento cian */
+  --color-accent-alt: #22D3EE;         /* Variante clara del acento */
+  --color-primary: #2563EB;            /* Azul primario (item activo, boton primario) */
+  --color-primary-hover: #3B82F6;      /* Azul primario en hover */
+  --color-text: #0F172A;               /* Texto principal oscuro sobre fondo claro */
+  --color-text-secondary: #475569;     /* Texto secundario / descripciones */
+  --color-border: #E2E8F0;             /* Bordes sutiles de inputs, tablas y separadores */
+  --color-error: #DC2626;              /* Texto de mensajes de error de validacion */
+
+  /* --- Tipografia --- */
+  --font-family-base: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-size-page-title: 1.25rem;   /* Titulo de pagina / breadcrumb activo */
+  --font-size-card-title: 1.125rem;  /* Titulo de tarjeta */
+  --font-size-body: 1rem;            /* Texto de cuerpo / inputs */
+  --font-size-small: 0.875rem;       /* Texto secundario / etiquetas de tabla */
+  --font-weight-bold: 700;
+  --font-weight-semibold: 600;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+
+  /* --- Forma, sombra y espaciado --- */
+  --radius-sm: 6px;                  /* Inputs, botones, items del menu */
+  --radius-md: 12px;                 /* Tarjetas (esquinas redondeadas) */
+  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-focus: 0 0 0 3px rgba(6, 182, 212, 0.35); /* Anillo de foco de acento */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --sidebar-width: 240px;            /* Ancho fijo del menu lateral */
+}
+
+/* --- Reset basico y estilos base --- */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body);
+  color: var(--color-text);
+  background-color: var(--color-content-bg);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}

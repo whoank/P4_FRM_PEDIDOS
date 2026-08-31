@@ -1,0 +1,36 @@
+# .dockerignore del backend
+#
+# Lista de rutas que NO deben copiarse a la imagen (durante "COPY . ."), para
+# obtener una imagen mas ligera, reproducible y sin artefactos locales.
+
+# Cache de bytecode de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Cache de herramientas de pruebas
+.pytest_cache/
+.hypothesis/
+
+# Pruebas: no se necesitan en la imagen de ejecucion (produccion), por lo que
+# se excluyen para reducir el tamano de la imagen.
+tests/
+
+# Entornos virtuales locales
+venv/
+.venv/
+env/
+
+# Configuracion y variables de entorno locales (no deben ir a la imagen)
+.env
+*.env
+
+# Metadatos de control de versiones y de editores
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# Documentacion (no necesaria dentro de la imagen)
+*.md

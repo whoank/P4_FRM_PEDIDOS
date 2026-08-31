@@ -1,0 +1,192 @@
+/*
+  Estilos de la seccion Productos (Tarea 17).
+  Reutiliza las variables CSS (tokens) definidas en index.css (:root):
+  colores de superficie, radios, sombras, tipografia y espaciado.
+  No edita los CSS globales; solo define clases propias de esta seccion.
+  Sigue la guia "Visual Style" del design.md: tarjetas blancas, etiqueta
+  encima del input, anillo de foco de acento, boton primario y tablas.
+*/
+
+/* Contenedor vertical de las tarjetas de la seccion. */
+.productos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* Tarjeta blanca reutilizable (formulario y lista). */
+.tarjeta {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-5);
+}
+
+/* Titulo de una tarjeta (formulario / lista). */
+.tituloTarjeta {
+  margin: 0 0 var(--space-4);
+  font-size: var(--font-size-card-title);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+/* --- Formulario de alta / edicion --- */
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Cada campo apila la etiqueta encima del input. */
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* Etiqueta del campo, en texto secundario y encima del input. */
+.etiqueta {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Estilo comun de inputs y textarea. */
+.input,
+.textarea {
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+
+/* Foco visible con anillo de acento (cian). */
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-focus);
+}
+
+/* Campo Disponible (checkbox + etiqueta en la misma linea). */
+.campoCheckbox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+/* Fila de botones del formulario. */
+.acciones {
+  display: flex;
+  gap: var(--space-3);
+}
+
+/* Boton primario (Crear / Guardar). */
+.botonPrimario {
+  padding: var(--space-3) var(--space-5);
+  border: none;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-primary);
+  color: #ffffff;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.botonPrimario:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.botonPrimario:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+/* Boton secundario tipo texto (Cancelar edicion). */
+.botonSecundario {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body);
+  cursor: pointer;
+}
+
+.botonSecundario:hover {
+  border-color: var(--color-primary);
+}
+
+/* Mensaje de error de validacion (rojo, debajo del formulario). */
+.error {
+  margin: 0;
+  color: var(--color-error);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-medium);
+}
+
+/* --- Tabla de productos --- */
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Encabezado de la tabla en gris, tamaño pequeño. */
+.tabla thead th {
+  text-align: left;
+  padding: var(--space-3);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-medium);
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* Celdas de datos separadas por lineas sutiles. */
+.tabla tbody td {
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--font-size-body);
+  color: var(--color-text);
+}
+
+/* Columna de acciones: enlace/boton tipo texto en color de acento.
+   Se usa el tamano pequeno (--font-size-small) para que la accion "Editar"
+   sea uniforme con la de la seccion Clientes segun la guia Visual Style. */
+.accionTabla {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--color-accent);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-small);
+  cursor: pointer;
+}
+
+.accionTabla:hover {
+  text-decoration: underline;
+}
+
+/* Mensaje cuando no hay productos registrados. */
+.vacio {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
