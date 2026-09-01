@@ -25,6 +25,7 @@ export const OPCIONES_MENU = [
   { id: 'productos', etiqueta: 'Productos', icono: '\u{1F4E6}' },  // caja
   { id: 'pedidos', etiqueta: 'Pedidos', icono: '\u{1F9FE}' },      // recibo
   { id: 'reporte', etiqueta: 'Reporte diario', icono: '\u{1F4CA}' }, // grafico
+  { id: 'administracion', etiqueta: 'Administración', icono: '\u{1F6E1}\u{FE0F}' }, // escudo
 ]
 
 export default function MenuLateral({ seccionActiva, onSeleccionar, onCerrarSesion }) {

@@ -22,6 +22,7 @@ import Clientes from './secciones/Clientes.jsx'
 import Productos from './secciones/Productos.jsx'
 import Pedidos from './secciones/Pedidos.jsx'
 import ReporteDiario from './secciones/ReporteDiario.jsx'
+import Administracion from './secciones/Administracion.jsx'
 import { AuthProvider, useAuth } from './auth/AuthContext.jsx'
 import Login from './auth/Login.jsx'
 import './layout.css'
@@ -50,6 +51,7 @@ function AppAutenticada() {
     productos: () => <Productos />,
     pedidos: () => <Pedidos />,
     reporte: () => <ReporteDiario />,
+    administracion: () => <Administracion />,
   }
 
   // Resuelve el componente de la seccion activa; si no existe, cae en Inicio.

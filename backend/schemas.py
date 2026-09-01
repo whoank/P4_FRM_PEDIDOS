@@ -13,7 +13,7 @@
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 from enum import Enum
 from typing import Annotated, Optional
@@ -232,3 +232,56 @@ class MensajeRespuesta(BaseModel):
     """Respuesta simple con un mensaje descriptivo (por ejemplo, en logout)."""
 
     detail: str
+
+
+# ---------------------------------------------------------------------------
+# Esquemas de Gestion de Usuarios (extension de Administracion)
+# ---------------------------------------------------------------------------
+
+
+class UsuarioCrear(BaseModel):
+    """Request para crear un nuevo usuario desde la administracion.
+
+    - username: obligatorio, 1..50 caracteres.
+    - password: obligatorio (en claro; solo viaja en el body del POST).
+    - password_confirmacion: repeticion de la contrasena.
+
+    La comprobacion de coincidencia entre password y password_confirmacion la
+    hace el router (para devolver un mensaje claro en `detail`), no el schema.
+    Las contrasenas nunca se guardan ni se registran en claro: el router genera
+    su hash antes de persistir.
+    """
+
+    username: str = Field(min_length=1, max_length=50)
+    password: str = Field(min_length=1)
+    password_confirmacion: str = Field(min_length=1)
+
+
+class UsuarioCambiarPassword(BaseModel):
+    """Request para cambiar la contrasena de un usuario existente.
+
+    La coincidencia entre password y password_confirmacion se valida en el
+    router para devolver un mensaje descriptivo. La contrasena nunca se guarda
+    en claro: el router la hashea antes de persistir.
+    """
+
+    password: str = Field(min_length=1)
+    password_confirmacion: str = Field(min_length=1)
+
+
+class UsuarioListado(BaseModel):
+    """Response con los datos de un usuario para el listado de administracion.
+
+    Incluye estado (active) y fechas, pero NUNCA expone password_hash ni ningun
+    token. Se construye directamente desde el objeto ORM User gracias a
+    from_attributes.
+    """
+
+    id: int
+    username: str
+    active: bool
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+    last_login: datetime | None = None
+
+    model_config = ConfigDict(from_attributes=True)

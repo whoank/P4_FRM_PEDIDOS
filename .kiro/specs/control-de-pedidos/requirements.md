@@ -211,3 +211,93 @@ El proyecto está diseñado para ser pequeño, educativo y fácil de implementar
 4. **Actualizar el estado de un pedido**: El Usuario abre la sección Pedidos, selecciona un Pedido y cambia su Estado_Pedido (por ejemplo, de Pendiente a Preparando y luego a Entregado).
 5. **Consultar el reporte diario**: El Usuario abre la sección Reporte diario y consulta los Pedidos del día, la cantidad total de Pedidos y la suma de ventas del día.
 6. **Editar un cliente o producto**: El Usuario abre la sección correspondiente, selecciona un registro, modifica sus datos y guarda los cambios.
+
+## Requerimientos de Administración (Extensión)
+
+> Esta sección extiende el sistema con un módulo de Administración y Gestión de Usuarios. Se agrega como una extensión independiente y NO modifica los Requerimientos 1 a 16 ni las reglas de Clientes, Productos, Pedidos y Reporte diario.
+
+### Glosario (Extensión)
+
+- **Administrador**: Usuario autenticado que accede a la sección Administración para gestionar los Usuarios de acceso a la aplicación.
+- **Usuario_Acceso**: Cuenta que puede iniciar sesión en la aplicación; tiene Nombre_Usuario, contraseña (almacenada solo como hash), Estado_Usuario, fecha de creación, fecha de actualización y, si existe, último acceso.
+- **Estado_Usuario**: Valor del Usuario_Acceso; uno de: Activo, Inactivo (corresponde al campo `active`).
+- **Sesion**: Sesión de acceso vigente de un Usuario_Acceso, respaldada por una cookie HttpOnly.
+
+### Requerimiento 17: Navegación a Administración y Gestión de Usuarios
+
+**Historia de Usuario:** Como Administrador, quiero una sección Administración con la opción Gestión de Usuarios, para administrar las cuentas de acceso a la aplicación.
+
+#### Criterios de Aceptación
+
+1. THE Sistema SHALL mostrar en el Menu_Lateral una opción Administración, además de las opciones existentes.
+2. WHEN el Administrador selecciona Administración, THE Sistema SHALL mostrar un acceso a la opción Gestión de Usuarios.
+3. WHEN el Administrador selecciona Gestión de Usuarios, THE Sistema SHALL mostrar la pantalla de administración de Usuarios_Acceso.
+4. THE Sistema SHALL mantener sin cambios las secciones Inicio, Clientes, Productos, Pedidos y Reporte diario.
+
+### Requerimiento 18: Listado de usuarios
+
+**Historia de Usuario:** Como Administrador, quiero ver la lista de usuarios, para conocer quién puede acceder a la aplicación y su estado.
+
+#### Criterios de Aceptación
+
+1. WHEN el Administrador abre Gestión de Usuarios, THE Sistema SHALL mostrar la lista de Usuarios_Acceso con ID, Nombre_Usuario, Estado_Usuario, fecha de creación y último acceso (si existe).
+2. THE Sistema SHALL mostrar el Estado_Usuario como "Activo" cuando `active` es verdadero y como "Inactivo" cuando `active` es falso.
+3. THE Sistema SHALL NOT incluir el hash de contraseña ni el hash del token de sesión en las respuestas de la API ni en la interfaz.
+
+### Requerimiento 19: Creación de usuarios
+
+**Historia de Usuario:** Como Administrador, quiero crear usuarios, para dar acceso a nuevas personas.
+
+#### Criterios de Aceptación
+
+1. WHEN el Administrador envía el formulario de creación con Nombre_Usuario y contraseña, y la contraseña coincide con su confirmación, THE Sistema SHALL crear un nuevo Usuario_Acceso.
+2. WHEN el Sistema crea un Usuario_Acceso, THE Sistema SHALL asignarle el Estado_Usuario Activo de forma predeterminada.
+3. WHEN el Sistema crea un Usuario_Acceso, THE Sistema SHALL almacenar únicamente el hash de la contraseña usando el mecanismo de hash existente del proyecto, y SHALL NOT almacenar la contraseña en texto plano.
+4. IF el Administrador envía el formulario con el Nombre_Usuario vacío, THEN THE Sistema SHALL rechazar la creación y mostrar un mensaje que indique que el Nombre_Usuario es obligatorio.
+5. IF el Administrador envía el formulario con la contraseña vacía, THEN THE Sistema SHALL rechazar la creación y mostrar un mensaje que indique que la contraseña es obligatoria.
+6. IF la contraseña y su confirmación no coinciden, THEN THE Sistema SHALL rechazar la creación y mostrar un mensaje que indique que las contraseñas no coinciden.
+7. IF ya existe un Usuario_Acceso con el mismo Nombre_Usuario, THEN THE Sistema SHALL rechazar la creación y mostrar un mensaje que indique que el Nombre_Usuario ya está en uso.
+
+### Requerimiento 20: Activación de usuarios (dar de alta)
+
+**Historia de Usuario:** Como Administrador, quiero dar de alta un usuario, para permitirle iniciar sesión nuevamente.
+
+#### Criterios de Aceptación
+
+1. WHEN el Administrador da de alta un Usuario_Acceso Inactivo, THE Sistema SHALL establecer su Estado_Usuario en Activo (`active` verdadero).
+2. WHILE un Usuario_Acceso tenga Estado_Usuario Activo, THE Sistema SHALL permitirle iniciar sesión con credenciales correctas.
+
+### Requerimiento 21: Desactivación de usuarios (dar de baja)
+
+**Historia de Usuario:** Como Administrador, quiero dar de baja un usuario, para revocar su acceso sin borrar su registro.
+
+#### Criterios de Aceptación
+
+1. WHEN el Administrador da de baja un Usuario_Acceso Activo, THE Sistema SHALL establecer su Estado_Usuario en Inactivo (`active` falso).
+2. WHEN el Sistema da de baja un Usuario_Acceso, THE Sistema SHALL invalidar todas las Sesiones activas de ese Usuario_Acceso.
+3. THE Sistema SHALL NOT eliminar físicamente el Usuario_Acceso de la base de datos (la baja es lógica).
+4. WHILE un Usuario_Acceso tenga Estado_Usuario Inactivo, THE Sistema SHALL rechazar sus intentos de iniciar sesión.
+
+### Requerimiento 22: Cambio de contraseña de un usuario
+
+**Historia de Usuario:** Como Administrador, quiero cambiar la contraseña de un usuario, para restablecer su acceso de forma segura.
+
+#### Criterios de Aceptación
+
+1. WHEN el Administrador envía una nueva contraseña que coincide con su confirmación para un Usuario_Acceso, THE Sistema SHALL actualizar el hash de contraseña usando el mecanismo de hash existente del proyecto.
+2. THE Sistema SHALL almacenar únicamente el hash de la nueva contraseña y SHALL NOT almacenar la contraseña en texto plano.
+3. IF la nueva contraseña y su confirmación no coinciden, THEN THE Sistema SHALL rechazar el cambio y mostrar un mensaje que indique que las contraseñas no coinciden.
+4. WHEN el Sistema cambia la contraseña de un Usuario_Acceso, THE Sistema SHALL invalidar todas las Sesiones activas de ese Usuario_Acceso para obligarlo a iniciar sesión nuevamente.
+5. WHEN el Usuario_Acceso inicia sesión después de un cambio de contraseña, THE Sistema SHALL aceptar únicamente la nueva contraseña y SHALL rechazar la contraseña anterior.
+
+### Requerimiento 23: Protección y seguridad de la administración de usuarios
+
+**Historia de Usuario:** Como responsable del sistema, quiero que la administración de usuarios sea segura, para proteger las cuentas de acceso.
+
+#### Criterios de Aceptación
+
+1. THE Sistema SHALL exponer las operaciones de administración de Usuarios_Acceso mediante una API bajo el prefijo `/api` y SHALL requerir una Sesión válida (usuario autenticado) para todas ellas.
+2. IF una solicitud a la administración de Usuarios_Acceso no incluye una Sesión válida, THEN THE Sistema SHALL responder con el código HTTP 401.
+3. THE Sistema SHALL reutilizar el modelo de Usuario existente (tabla `users`) y NO SHALL crear una segunda tabla de usuarios.
+4. THE Sistema SHALL reutilizar el mecanismo de sesión existente (tabla de sesiones y cookie HttpOnly) y NO SHALL introducir un segundo mecanismo de autenticación.
+5. IF ocurre un error de validación (Nombre_Usuario duplicado, contraseñas que no coinciden o campos obligatorios vacíos), THEN THE Sistema SHALL responder con un mensaje descriptivo sin revelar información sensible.

@@ -1,0 +1,113 @@
+/*
+  Estilos de la seccion Administracion.
+  Reutiliza EXCLUSIVAMENTE las variables CSS (tokens) definidas en index.css
+  (:root). Mismo estilo que Inicio.module.css (tarjetas + grid de accesos).
+  No edita CSS globales; solo define clases propias de esta seccion.
+*/
+
+/* Contenedor vertical de las tarjetas de la seccion. */
+.administracion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* Tarjeta blanca reutilizable (bienvenida y contenedor de accesos). */
+.tarjeta {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-5);
+}
+
+/* Titulo principal de la seccion. */
+.titulo {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-page-title);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+}
+
+/* Texto secundario descriptivo. */
+.subtitulo {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+/* Titulo de la seccion de accesos. */
+.tituloAccesos {
+  margin: 0 0 var(--space-4);
+  font-size: var(--font-size-card-title);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+/* Rejilla responsiva de accesos. */
+.accesos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--space-4);
+}
+
+/* Cada acceso es un boton con aspecto de tarjeta interior. */
+.acceso {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-family-base);
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Hover: se resalta con el color primario. */
+.acceso:hover {
+  border-color: var(--color-primary);
+}
+
+/* Foco visible por teclado (anillo de acento). */
+.acceso:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+  border-color: var(--color-accent);
+}
+
+/* Icono del acceso. */
+.accesoIcono {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+/* Titulo del acceso. */
+.accesoTitulo {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-body);
+}
+
+/* Descripcion breve del acceso. */
+.accesoTexto {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+/* Enlace "Volver a Administracion" tipo texto en color de acento. */
+.volver {
+  align-self: flex-start;
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--color-accent);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body);
+  cursor: pointer;
+}
+
+.volver:hover {
+  text-decoration: underline;
+}

@@ -146,3 +146,41 @@ export function obtenerReporteDiario(fecha) {
   const query = fecha ? `?fecha=${encodeURIComponent(fecha)}` : ''
   return request(`/reporte-diario${query}`)
 }
+
+// ---------------------------------------------------------------------------
+// Usuarios (Administracion > Gestion de Usuarios)
+// ---------------------------------------------------------------------------
+//
+// NOTA: request() antepone API_URL, que ya termina en "/api". Por eso las
+// rutas de usuarios se escriben relativas ("/usuarios", "/usuarios/{id}/...")
+// y quedan bajo "/api/usuarios" en el backend.
+//
+// El backend NUNCA envia password_hash: la lista solo trae datos publicos
+// (id, username, active, created_at, last_login).
+
+// Lista todos los usuarios registrados: GET /api/usuarios.
+export function listarUsuarios() {
+  return request('/usuarios')
+}
+
+// Crea un usuario: POST /api/usuarios.
+// datos: { username, password, password_confirmacion }.
+export function crearUsuario(datos) {
+  return request('/usuarios', conCuerpo('POST', datos))
+}
+
+// Da de alta (activa) un usuario: PATCH /api/usuarios/{id}/activar.
+export function activarUsuario(id) {
+  return request(`/usuarios/${id}/activar`, { method: 'PATCH' })
+}
+
+// Da de baja (desactiva) un usuario: PATCH /api/usuarios/{id}/desactivar.
+export function desactivarUsuario(id) {
+  return request(`/usuarios/${id}/desactivar`, { method: 'PATCH' })
+}
+
+// Cambia la contrasena de un usuario: PATCH /api/usuarios/{id}/password.
+// datos: { password, password_confirmacion }.
+export function cambiarPasswordUsuario(id, datos) {
+  return request(`/usuarios/${id}/password`, conCuerpo('PATCH', datos))
+}

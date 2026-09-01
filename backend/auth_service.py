@@ -157,3 +157,15 @@ def crear_usuario_inicial(db: Session) -> None:
     )
     db.add(usuario)
     db.commit()
+
+def invalidar_sesiones_usuario(db: Session, user_id: int) -> None:
+    """Elimina TODAS las sesiones activas de un usuario (por user_id).
+
+    Se usa al dar de baja un usuario o al cambiar su contrasena, para forzar
+    que deba iniciar sesion de nuevo. Idempotente: si no hay sesiones, no hace
+    nada. La consulta es parametrizada via ORM (nada de SQL crudo) y no registra
+    ningun dato sensible.
+    """
+    # Borrado masivo por user_id: elimina 0..N filas segun cuantas sesiones haya.
+    db.query(UserSession).filter(UserSession.user_id == user_id).delete()
+    db.commit()

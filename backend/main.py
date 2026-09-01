@@ -25,7 +25,7 @@ from auth_service import crear_usuario_inicial
 # /api/clientes, /api/productos, /api/pedidos, /api/reporte-diario), asi que se
 # incluyen tal cual, sin anadir un prefijo adicional que duplicaria las rutas.
 # El router auth expone /auth/login, /auth/me y /auth/logout (sin prefijo /api).
-from routers import auth, clientes, pedidos, productos, reporte
+from routers import auth, clientes, pedidos, productos, reporte, usuarios
 
 
 # --- Ciclo de vida de la aplicacion (arranque / apagado) -------------------
@@ -90,6 +90,8 @@ app.include_router(pedidos.router)
 app.include_router(reporte.router)
 # Router de autenticacion (sin prefijo /api): /auth/login, /auth/me, /auth/logout.
 app.include_router(auth.router)
+# Router de gestion de usuarios (extension de Administracion): /api/usuarios.
+app.include_router(usuarios.router)
 
 
 # --- Endpoint de health-check ----------------------------------------------
