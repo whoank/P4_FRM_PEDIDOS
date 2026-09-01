@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Vigilante de las reglas de negocio",
+      "trigger": "PostFileSave",
+      "action": {
+        "type": "agent",
+        "prompt": "Cuando se modifique cualquier archivo dentro de estas rutas:\n\nbackend/app/services/**\nbackend/app/models/**\nbackend/app/schemas/**\n\nrevisa los cambios realizados y compáralos contra las reglas de negocio definidas en:\n\n.kiro/specs/**/requirements.md\n\nConsidera los archivos requirements.md como la fuente de verdad de las reglas de negocio.\n\nValida especialmente cambios relacionados con:\n\n* creación de registros\n* actualización de registros\n* eliminación de registros\n* validaciones obligatorias\n* estados permitidos\n* transiciones entre estados\n* cálculos de negocio\n* restricciones\n* campos obligatorios\n* relaciones entre entidades\n* valores mínimos y máximos\n* condiciones especiales definidas en el Spec\n\nSi el cambio cumple con las reglas de negocio, informa:\n\nRESULTADO: OK\n\nSi detectas una posible violación, informa:\n\nRESULTADO: ADVERTENCIA\n\ne indica:\n\n* archivo modificado\n* función o clase afectada\n* requisito del Spec relacionado\n* regla de negocio afectada\n* cambio detectado\n* riesgo funcional\n* recomendación\n\nNo modifiques automáticamente los archivos requirements.md.\n\nNo cambies una regla de negocio para adaptarla al código.\n\nNo inventes reglas que no estén documentadas.\n\nSi detectas un nuevo comportamiento o regla que no está definida en el Spec, informa:\n\n\"Nueva regla o comportamiento detectado que no está documentado en el Spec.\"\n\nPresta especial atención a:\n\nbackend/app/services/**\n\ncomo ubicación principal de la lógica de negocio.\n\nTambién revisa:\n\nbackend/app/models/**\n\npara detectar cambios en entidades, relaciones, estados, restricciones o campos.\n\nY revisa:\n\nbackend/app/schemas/**\n\npara detectar cambios en validaciones, tipos de datos, campos obligatorios y contratos de entrada o salida.\n\nEl objetivo de este Hook es detectar cambios que puedan romper o modificar accidentalmente las reglas de negocio definidas en los Specs."
+      },
+      "description": "Vigilar las reglas del negocio",
+      "matcher": "^backend/app/(services|models|schemas)/.*$",
+      "enabled": true
+    }
+  ]
+}

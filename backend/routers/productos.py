@@ -37,6 +37,9 @@ from services import (
     validar_precio,
 )
 
+# Dependencia de autenticacion: protege todos los endpoints (requiere sesion).
+from auth_dependencies import get_current_user
+
 # APIRouter con prefijo comun y etiqueta para la documentacion automatica.
 # main.py incluira este router en la Tarea 10.
 router = APIRouter(prefix="/api/productos", tags=["productos"])
@@ -93,7 +96,9 @@ def _obtener_producto_o_404(producto_id: int, db: Session) -> Producto:
 # ---------------------------------------------------------------------------
 @router.get("", response_model=list[ProductoRespuesta])
 def listar_productos(
-    solo_disponibles: bool = False, db: Session = Depends(get_db)
+    solo_disponibles: bool = False,
+    db: Session = Depends(get_db),
+    _usuario=Depends(get_current_user),
 ) -> list[Producto]:
     """Devuelve la lista de productos.
 
@@ -114,7 +119,11 @@ def listar_productos(
 # POST /api/productos -> crea un producto (Req. 5.1, 5.5, 5.6)
 # ---------------------------------------------------------------------------
 @router.post("", response_model=ProductoRespuesta, status_code=status.HTTP_201_CREATED)
-def crear_producto(datos: ProductoCrear, db: Session = Depends(get_db)) -> Producto:
+def crear_producto(
+    datos: ProductoCrear,
+    db: Session = Depends(get_db),
+    _usuario=Depends(get_current_user),
+) -> Producto:
     """Crea un nuevo producto y lo devuelve con su id asignado (201).
 
     `disponible` es True por defecto cuando el request no lo incluye, gracias al
@@ -141,7 +150,11 @@ def crear_producto(datos: ProductoCrear, db: Session = Depends(get_db)) -> Produ
 # GET /api/productos/{id} -> obtiene un producto (404 si no existe)
 # ---------------------------------------------------------------------------
 @router.get("/{producto_id}", response_model=ProductoRespuesta)
-def obtener_producto(producto_id: int, db: Session = Depends(get_db)) -> Producto:
+def obtener_producto(
+    producto_id: int,
+    db: Session = Depends(get_db),
+    _usuario=Depends(get_current_user),
+) -> Producto:
     """Devuelve un producto por su id; responde 404 si no existe (Req. 15.3)."""
     return _obtener_producto_o_404(producto_id, db)
 
@@ -151,7 +164,10 @@ def obtener_producto(producto_id: int, db: Session = Depends(get_db)) -> Product
 # ---------------------------------------------------------------------------
 @router.put("/{producto_id}", response_model=ProductoRespuesta)
 def actualizar_producto(
-    producto_id: int, datos: ProductoCrear, db: Session = Depends(get_db)
+    producto_id: int,
+    datos: ProductoCrear,
+    db: Session = Depends(get_db),
+    _usuario=Depends(get_current_user),
 ) -> Producto:
     """Actualiza los datos de un producto existente (200); 404 si no existe.
 

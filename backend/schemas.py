@@ -196,3 +196,39 @@ class ResumenReporte(BaseModel):
     cantidad_pedidos: int = Field(ge=0)
     suma_ventas: Monto
     pedidos: list[PedidoRespuesta]
+
+
+# ---------------------------------------------------------------------------
+# Esquemas de autenticacion (modulo de sesion por cookie)
+# ---------------------------------------------------------------------------
+
+
+class LoginRequest(BaseModel):
+    """Request de inicio de sesion: usuario y contrasena en claro.
+
+    La contrasena solo viaja en el body del POST /auth/login (sobre HTTPS en
+    produccion); nunca se guarda ni se registra en claro.
+    """
+
+    username: str
+    password: str
+
+
+class UsuarioRespuesta(BaseModel):
+    """Response con los datos publicos del usuario autenticado.
+
+    Nunca incluye password_hash ni tokens. Se construye directamente desde el
+    objeto ORM User gracias a from_attributes.
+    """
+
+    id: int
+    username: str
+    active: bool
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class MensajeRespuesta(BaseModel):
+    """Respuesta simple con un mensaje descriptivo (por ejemplo, en logout)."""
+
+    detail: str

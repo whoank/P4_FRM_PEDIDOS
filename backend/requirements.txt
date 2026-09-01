@@ -5,3 +5,4 @@ psycopg[binary]
 pydantic
 hypothesis
 pytest
+bcrypt

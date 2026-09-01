@@ -36,6 +36,9 @@ from schemas import PedidoCrear, PedidoRespuesta
 # Reglas de negocio puras reutilizadas desde la capa de servicios.
 from services import ESTADOS_VALIDOS, calcular_total, es_estado_valido, producto_seleccionable
 
+# Dependencia de autenticacion: protege todos los endpoints (requiere sesion).
+from auth_dependencies import get_current_user
+
 # APIRouter con prefijo comun y etiqueta para la documentacion automatica.
 # main.py incluira este router en la Tarea 10.
 router = APIRouter(prefix="/api/pedidos", tags=["pedidos"])
@@ -106,7 +109,9 @@ def _obtener_pedido_o_404(pedido_id: int, db: Session) -> Pedido:
 # GET /api/pedidos -> lista de pedidos con nombres (Req. 11.1)
 # ---------------------------------------------------------------------------
 @router.get("", response_model=list[PedidoRespuesta])
-def listar_pedidos(db: Session = Depends(get_db)) -> list[PedidoRespuesta]:
+def listar_pedidos(
+    db: Session = Depends(get_db), _usuario=Depends(get_current_user)
+) -> list[PedidoRespuesta]:
     """Devuelve todos los pedidos con cliente_nombre y producto_nombre.
 
     Si no hay pedidos devuelve una lista vacia; el mensaje de "no hay pedidos"
@@ -120,7 +125,11 @@ def listar_pedidos(db: Session = Depends(get_db)) -> list[PedidoRespuesta]:
 # POST /api/pedidos -> crea un pedido (Req. 8.1 .. 8.9, 9.1)
 # ---------------------------------------------------------------------------
 @router.post("", response_model=PedidoRespuesta, status_code=status.HTTP_201_CREATED)
-def crear_pedido(datos: PedidoCrear, db: Session = Depends(get_db)) -> PedidoRespuesta:
+def crear_pedido(
+    datos: PedidoCrear,
+    db: Session = Depends(get_db),
+    _usuario=Depends(get_current_user),
+) -> PedidoRespuesta:
     """Crea un nuevo pedido aplicando las reglas de negocio y lo devuelve (201).
 
     Flujo:
@@ -188,7 +197,10 @@ def crear_pedido(datos: PedidoCrear, db: Session = Depends(get_db)) -> PedidoRes
 # ---------------------------------------------------------------------------
 @router.patch("/{pedido_id}/estado", response_model=PedidoRespuesta)
 def cambiar_estado(
-    pedido_id: int, datos: CambiarEstadoRequest, db: Session = Depends(get_db)
+    pedido_id: int,
+    datos: CambiarEstadoRequest,
+    db: Session = Depends(get_db),
+    _usuario=Depends(get_current_user),
 ) -> PedidoRespuesta:
     """Cambia el estado de un pedido validando el conjunto de valores permitidos.
 

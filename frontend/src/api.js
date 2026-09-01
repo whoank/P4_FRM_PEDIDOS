@@ -35,6 +35,11 @@ async function request(path, options = {}) {
   let respuesta
   try {
     respuesta = await fetch(`${API_URL}${path}`, {
+      // `credentials: 'include'` hace que el navegador envie la cookie de
+      // sesion HttpOnly en TODAS las llamadas protegidas (los endpoints de
+      // negocio ahora requieren sesion). Sin esto, la cookie no viajaria en
+      // peticiones cross-origin y el backend responderia 401.
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       ...options,
     })

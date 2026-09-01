@@ -34,6 +34,9 @@ from schemas import PedidoRespuesta, ResumenReporte
 # Reglas de negocio puras reutilizadas desde la capa de servicios (Tarea 4).
 from services import filtrar_por_fecha, resumir_reporte
 
+# Dependencia de autenticacion: protege el endpoint (requiere sesion).
+from auth_dependencies import get_current_user
+
 # APIRouter con prefijo comun y etiqueta para la documentacion automatica.
 # main.py incluira este router en la Tarea 10.
 router = APIRouter(prefix="/api", tags=["reporte"])
@@ -65,7 +68,9 @@ def _a_respuesta(pedido: Pedido) -> PedidoRespuesta:
 # ---------------------------------------------------------------------------
 @router.get("/reporte-diario", response_model=ResumenReporte)
 def reporte_diario(
-    fecha: date | None = None, db: Session = Depends(get_db)
+    fecha: date | None = None,
+    db: Session = Depends(get_db),
+    _usuario=Depends(get_current_user),
 ) -> ResumenReporte:
     """Devuelve el resumen de pedidos y ventas de un dia.
 

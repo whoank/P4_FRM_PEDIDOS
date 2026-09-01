@@ -15,13 +15,17 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # Infraestructura de base de datos (Tarea 2): reintento de conexion y creacion
 # del esquema. crear_tablas() vive en models.py y usa Base.metadata.create_all.
-from database import esperar_conexion
+from database import SessionLocal, esperar_conexion
 from models import crear_tablas
+
+# Seed idempotente del usuario inicial (modulo de autenticacion).
+from auth_service import crear_usuario_inicial
 
 # Los cuatro routers ya definen su propio prefijo /api (por ejemplo
 # /api/clientes, /api/productos, /api/pedidos, /api/reporte-diario), asi que se
 # incluyen tal cual, sin anadir un prefijo adicional que duplicaria las rutas.
-from routers import clientes, pedidos, productos, reporte
+# El router auth expone /auth/login, /auth/me y /auth/logout (sin prefijo /api).
+from routers import auth, clientes, pedidos, productos, reporte
 
 
 # --- Ciclo de vida de la aplicacion (arranque / apagado) -------------------
@@ -44,6 +48,14 @@ async def lifespan(app: FastAPI):
     """
     esperar_conexion()
     crear_tablas()
+    # Tras crear el esquema, sembramos de forma idempotente el usuario inicial.
+    # Se abre una sesion propia (fuera del ciclo de peticiones) y se cierra al
+    # terminar. crear_usuario_inicial no hace nada si el usuario ya existe.
+    db = SessionLocal()
+    try:
+        crear_usuario_inicial(db)
+    finally:
+        db.close()
     # El "yield" separa el arranque (arriba) del apagado (abajo). No hay tareas
     # de limpieza especiales al detener la aplicacion.
     yield
@@ -76,6 +88,8 @@ app.include_router(clientes.router)
 app.include_router(productos.router)
 app.include_router(pedidos.router)
 app.include_router(reporte.router)
+# Router de autenticacion (sin prefijo /api): /auth/login, /auth/me, /auth/logout.
+app.include_router(auth.router)
 
 
 # --- Endpoint de health-check ----------------------------------------------

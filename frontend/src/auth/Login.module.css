@@ -1,0 +1,160 @@
+/*
+  Estilos de la pantalla de Login.
+  Reutiliza las variables CSS (tokens) definidas en index.css (:root):
+  colores de superficie, sidebar, bordes, foco, primario, error, radios,
+  sombras, tipografia y espaciado. No edita CSS globales; clases propias.
+*/
+
+/* Pantalla completa centrada, con el fondo oscuro del sidebar para dar una
+   sensacion de "portada" elegante y coherente con la marca de la app. */
+.pantalla {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  background-color: var(--color-sidebar-bg);
+}
+
+/* Tarjeta blanca centrada, responsive (max-width comodo en movil y escritorio). */
+.tarjeta {
+  width: 100%;
+  max-width: 400px;
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-6);
+}
+
+/* Marca: mismo emoji y texto que el MenuLateral, como logo de bienvenida. */
+.marca {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  font-size: var(--font-size-card-title);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+}
+
+.marcaIcono {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+/* Mensaje de bienvenida bajo el logo. */
+.bienvenida {
+  margin: 0 0 var(--space-5);
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body);
+}
+
+/* Formulario en columna. */
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Campo: etiqueta ENCIMA del input (mismo patron que las secciones). */
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.etiqueta {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Input con borde sutil y esquinas redondeadas. */
+.input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body);
+  color: var(--color-text);
+  background-color: var(--color-surface);
+}
+
+/* Foco visible con anillo de acento (cian). */
+.input:focus {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+  border-color: var(--color-accent);
+}
+
+/* Contenedor del campo contrasena: input + boton mostrar/ocultar. */
+.campoPassword {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+
+.campoPassword .input {
+  flex: 1;
+}
+
+/* Boton para mostrar/ocultar la contrasena (tipo secundario/icono). */
+.botonToggle {
+  flex: 0 0 auto;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body);
+  cursor: pointer;
+}
+
+.botonToggle:hover {
+  border-color: var(--color-primary);
+}
+
+.botonToggle:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+/* Boton primario azul (Iniciar sesion), ancho completo. */
+.botonPrimario {
+  width: 100%;
+  padding: var(--space-3) var(--space-5);
+  border: none;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-primary);
+  color: #ffffff;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.botonPrimario:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+.botonPrimario:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+/* Estado deshabilitado mientras se procesa el envio. */
+.botonPrimario:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Mensaje de error (credenciales invalidas o conexion), en rojo. */
+.error {
+  margin: 0;
+  color: var(--color-error);
+  font-size: var(--font-size-small);
+}

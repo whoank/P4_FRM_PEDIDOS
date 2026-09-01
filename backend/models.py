@@ -11,6 +11,7 @@ from sqlalchemy import (
     CheckConstraint,
     Column,
     Date,
+    DateTime,
     ForeignKey,
     Integer,
     Numeric,
@@ -128,6 +129,73 @@ class Pedido(Base):
     # Relaciones hacia el cliente y el producto asociados al pedido.
     cliente = relationship("Cliente", back_populates="pedidos")
     producto = relationship("Producto", back_populates="pedidos")
+
+
+# ---------------------------------------------------------------------------
+# Modelos de autenticacion (modulo de sesion por cookie)
+# ---------------------------------------------------------------------------
+# Estos modelos son independientes de la logica de negocio (Cliente, Producto,
+# Pedido). Al heredar de Base quedan registrados en Base.metadata, por lo que
+# crear_tablas() (Base.metadata.create_all) creara sus tablas automaticamente
+# sin necesidad de migraciones.
+
+
+class User(Base):
+    """Usuario que puede iniciar sesion en la aplicacion.
+
+    La contrasena NUNCA se guarda en claro: se almacena unicamente su hash
+    (bcrypt) en password_hash.
+    """
+
+    __tablename__ = "users"
+
+    # id: clave primaria autoincremental.
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    # username: unico y obligatorio; indexado para acelerar la busqueda al login.
+    username = Column(String(50), unique=True, nullable=False, index=True)
+    # password_hash: hash bcrypt de la contrasena (nunca la contrasena en claro).
+    password_hash = Column(String(255), nullable=False)
+    # active: si es False, el usuario no puede autenticarse. Default True tambien
+    # a nivel de base de datos (server_default).
+    active = Column(
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default=text("true"),
+    )
+    # created_at / updated_at: marcas de tiempo gestionadas por la base de datos.
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+    # last_login: ultimo inicio de sesion exitoso; nulo hasta el primer login.
+    last_login = Column(DateTime, nullable=True)
+
+    # Relacion inversa hacia las sesiones activas del usuario (opcional, comoda).
+    sesiones = relationship("UserSession", back_populates="usuario")
+
+
+class UserSession(Base):
+    """Sesion activa de un usuario, referenciada por una cookie en el navegador.
+
+    En la base de datos se guarda solo el SHA-256 (hex) del token de sesion
+    (token_hash), NUNCA el token en claro: asi, aunque se filtre la tabla, no se
+    pueden reconstruir las cookies validas.
+    """
+
+    __tablename__ = "user_session"
+
+    # id: clave primaria autoincremental.
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    # user_id: FK al usuario dueno de la sesion; obligatorio e indexado.
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    # token_hash: SHA-256 hex (64 caracteres) del token de sesion; unico e indexado.
+    token_hash = Column(String(64), unique=True, nullable=False, index=True)
+    # created_at: momento de creacion de la sesion (gestionado por la BD).
+    created_at = Column(DateTime, server_default=func.now())
+    # expires_at: momento en que la sesion deja de ser valida; obligatorio.
+    expires_at = Column(DateTime, nullable=False)
+
+    # Relacion hacia el usuario dueno de la sesion.
+    usuario = relationship("User", back_populates="sesiones")
 
 
 def crear_tablas() -> None:

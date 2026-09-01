@@ -10,6 +10,7 @@
 // Recibe por props:
 //  - seccionActiva: id de la seccion actualmente seleccionada.
 //  - onSeleccionar: callback(id) que se invoca al hacer clic en una opcion.
+//  - onCerrarSesion: callback opcional que se invoca al pulsar "Cerrar sesion".
 //
 // El estilo visual proviene de la seccion "Visual Style" del design.md y usa
 // las variables CSS definidas en index.css. Las clases estan en layout.css.
@@ -26,7 +27,7 @@ export const OPCIONES_MENU = [
   { id: 'reporte', etiqueta: 'Reporte diario', icono: '\u{1F4CA}' }, // grafico
 ]
 
-export default function MenuLateral({ seccionActiva, onSeleccionar }) {
+export default function MenuLateral({ seccionActiva, onSeleccionar, onCerrarSesion }) {
   return (
     <aside className="sidebar" aria-label="Menu lateral">
       {/* Marca: icono + nombre de la app, en la parte superior */}
@@ -77,6 +78,20 @@ export default function MenuLateral({ seccionActiva, onSeleccionar }) {
             {'\u{1F6DF}'}
           </span>
           <span className="sidebar__item-texto">Soporte</span>
+        </button>
+
+        {/* "Cerrar sesion": invoca el callback del contexto de auth (si se
+            provee). El AuthProvider pondra usuario=null y el gate volvera al
+            Login automaticamente. */}
+        <button
+          type="button"
+          className="sidebar__item"
+          onClick={() => onCerrarSesion?.()}
+        >
+          <span className="sidebar__item-icono" aria-hidden="true">
+            {'\u{1F6AA}'}
+          </span>
+          <span className="sidebar__item-texto">Cerrar sesión</span>
         </button>
       </div>
     </aside>
