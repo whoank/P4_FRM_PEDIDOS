@@ -17,10 +17,14 @@
   min-height: 100vh;
 }
 
-/* Area de contenido (a la derecha del sidebar) con fondo claro */
+/* Area de contenido (a la derecha del sidebar) con fondo claro.
+   Es una columna flex de altura completa: topbar arriba, la seccion (con
+   flex:1) ocupa el espacio disponible y empuja la BarraUsuario al pie. Asi la
+   barra queda abajo SIN position:fixed y sin tapar el contenido. */
 .contenido {
   flex: 1;
   min-width: 0; /* evita desbordes horizontales del contenido */
+  min-height: 100vh; /* asegura que la columna llegue al pie de la ventana */
   background-color: var(--color-content-bg);
   /* Deja hueco para el sidebar fijo */
   margin-left: var(--sidebar-width);

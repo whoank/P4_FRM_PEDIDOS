@@ -26,6 +26,7 @@ import Productos from './secciones/Productos.jsx'
 import Pedidos from './secciones/Pedidos.jsx'
 import ReporteDiario from './secciones/ReporteDiario.jsx'
 import Administracion from './secciones/Administracion.jsx'
+import BarraUsuario from './componentes/BarraUsuario.jsx'
 import { AuthProvider, useAuth } from './auth/AuthContext.jsx'
 import Login from './auth/Login.jsx'
 import './layout.css'
@@ -108,6 +109,13 @@ function AppAutenticada() {
             </section>
           )}
         </main>
+
+        {/* Barra inferior fija al pie del area de contenido: muestra el usuario
+            autenticado y su rol. Vive una sola vez en el layout (no en cada
+            seccion) y toma el usuario del AuthContext (sin llamar a /auth/me).
+            El CSS de .contenido (flex-column) la mantiene abajo sin tapar el
+            contenido. */}
+        <BarraUsuario />
       </div>
     </div>
   )

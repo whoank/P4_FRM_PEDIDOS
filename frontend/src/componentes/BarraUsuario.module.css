@@ -1,0 +1,65 @@
+/*
+  Estilos de la barra inferior de usuario (BarraUsuario).
+  Reutiliza EXCLUSIVAMENTE las variables CSS (tokens) definidas en index.css
+  (:root): colores, tipografia y espaciado. No edita CSS globales.
+
+  La barra vive al pie del area de contenido (.contenido en layout.css, que usa
+  flex-column con la barra en margin-top:auto), por lo que NO usa position:fixed
+  y no tapa el contenido ni se superpone al menu lateral.
+*/
+
+.barra {
+  display: flex;
+  flex-wrap: wrap; /* en pantallas estrechas los datos bajan de linea */
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-3) var(--space-5);
+  /* Superficie clara con un borde superior sutil para separarla del contenido. */
+  background-color: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+/* Cada dato (usuario / rol): icono + texto alineados. */
+.dato {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Etiqueta ("Usuario:" / "Rol:") en texto secundario con peso medio. */
+.etiqueta {
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* El valor (username / rol) hereda el color de texto principal para contraste. */
+.dato {
+  color: var(--color-text);
+}
+
+/* Icono de usuario. */
+.icono {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* Separador vertical entre los dos datos. */
+.separador {
+  color: var(--color-border);
+}
+
+/* En pantallas estrechas ocultamos el separador y apilamos los datos en
+   columna (cada uno en su propia linea), evitando overflow horizontal. */
+@media (max-width: 480px) {
+  .barra {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+
+  .separador {
+    display: none;
+  }
+}
