@@ -301,3 +301,63 @@ El proyecto está diseñado para ser pequeño, educativo y fácil de implementar
 3. THE Sistema SHALL reutilizar el modelo de Usuario existente (tabla `users`) y NO SHALL crear una segunda tabla de usuarios.
 4. THE Sistema SHALL reutilizar el mecanismo de sesión existente (tabla de sesiones y cookie HttpOnly) y NO SHALL introducir un segundo mecanismo de autenticación.
 5. IF ocurre un error de validación (Nombre_Usuario duplicado, contraseñas que no coinciden o campos obligatorios vacíos), THEN THE Sistema SHALL responder con un mensaje descriptivo sin revelar información sensible.
+
+## Requerimientos de Roles y Permisos (Extensión)
+
+> Esta sección extiende la Administración con un sistema de Roles y Permisos por opción de menú. Se agrega como extensión independiente y NO modifica los Requerimientos 1 a 23 ni las reglas de negocio existentes. El acceso a las secciones se determina por los permisos del rol del usuario; la autorización real se valida en el backend.
+
+### Glosario (Extensión Roles)
+
+- **Rol**: Conjunto con nombre, descripción y estado (activo/inactivo) que agrupa Permisos y se asigna a Usuarios_Acceso.
+- **Permiso**: Autorización a una opción del menú, con un Código interno de seguridad (por ejemplo `CLIENTES`) y un Nombre visible (por ejemplo "Clientes"). Códigos del catálogo: `CLIENTES`, `PRODUCTOS`, `PEDIDOS`, `REPORTE_DIARIO`, `ADMINISTRACION`, `USUARIOS`, `ROLES`.
+- **Permiso_Efectivo**: Código de permiso que un Usuario_Acceso posee, derivado de los permisos activos de su rol activo.
+- **Administrador_Funcional**: Usuario_Acceso Activo cuyo Rol está Activo y contiene el permiso `ROLES`.
+
+### Requerimiento 24: Gestión de roles
+
+**Historia de Usuario:** Como Administrador, quiero crear y administrar roles definidos por opciones de menú, para controlar a qué secciones accede cada usuario.
+
+#### Criterios de Aceptación
+
+1. THE Sistema SHALL mostrar dentro de Administración una opción Roles que permita listar, crear y editar Roles.
+2. WHEN el Administrador crea un Rol con un Nombre no vacío y único y un conjunto de Permisos existentes, THE Sistema SHALL crear el Rol con esos Permisos y el estado indicado (activo por defecto).
+3. IF el Administrador crea o edita un Rol con un Nombre vacío, THEN THE Sistema SHALL rechazar la operación y mostrar un mensaje que indique que el Nombre del rol es obligatorio.
+4. IF el Administrador crea un Rol con un Nombre que ya existe, THEN THE Sistema SHALL rechazar la creación y mostrar un mensaje que indique que ya existe un rol con ese nombre.
+5. IF el Administrador envía uno o más Códigos de Permiso que no existen en el catálogo, THEN THE Sistema SHALL rechazar la operación y mostrar un mensaje que indique que uno o más permisos no son válidos.
+6. WHEN el Administrador edita un Rol, THE Sistema SHALL reemplazar el conjunto de Permisos del Rol por el enviado (agregando y quitando según corresponda).
+7. THE Sistema SHALL mostrar en el listado de Roles el Nombre, la Descripción, el Estado y la cantidad de Permisos asignados.
+
+### Requerimiento 25: Asignación de rol a usuarios
+
+**Historia de Usuario:** Como Administrador, quiero asignar un rol a cada usuario, para determinar sus permisos.
+
+#### Criterios de Aceptación
+
+1. WHEN el Administrador crea o edita un Usuario_Acceso indicando un Rol, THE Sistema SHALL asignar ese Rol al Usuario_Acceso.
+2. THE Sistema SHALL ofrecer para asignación únicamente Roles Activos.
+3. IF el Administrador intenta asignar a un Usuario_Acceso un Rol Inactivo o inexistente, THEN THE Sistema SHALL rechazar la asignación y mostrar un mensaje que indique que el rol seleccionado no existe o no está activo.
+
+### Requerimiento 26: Autorización por permisos en el backend
+
+**Historia de Usuario:** Como responsable del sistema, quiero que los permisos se validen en el backend, para que ocultar opciones del menú no sea el único control de seguridad.
+
+#### Criterios de Aceptación
+
+1. THE Sistema SHALL exigir, en cada endpoint protegido de una opción del menú, el Permiso correspondiente a esa opción (por ejemplo `USUARIOS` para la administración de usuarios, `ROLES` para la administración de roles, `CLIENTES`, `PRODUCTOS`, `PEDIDOS`, `REPORTE_DIARIO` para sus secciones).
+2. IF un Usuario_Acceso autenticado solicita un endpoint para el que su rol no tiene el Permiso requerido, THEN THE Sistema SHALL responder con el código HTTP 403.
+3. WHEN el frontend consulta al usuario autenticado, THE Sistema SHALL incluir su Rol y la lista de sus Permiso_Efectivo, para construir el menú en una sola solicitud.
+4. THE Sistema SHALL construir el Menu_Lateral y las secciones accesibles del frontend a partir de los Permiso_Efectivo del usuario, y SHALL impedir el acceso a una sección restringida aunque se intente forzar la navegación.
+5. THE Sistema SHALL usar el Código interno del Permiso como identificador de seguridad y NO SHALL usar el Nombre visible como identificador.
+
+### Requerimiento 27: Preservación del acceso administrativo (invariante)
+
+**Historia de Usuario:** Como responsable del sistema, quiero que nunca se pueda dejar al sistema sin acceso administrativo, para no quedar bloqueado fuera de la administración.
+
+#### Criterios de Aceptación
+
+1. THE Sistema SHALL mantener en todo momento al menos un Administrador_Funcional (un Usuario_Acceso Activo cuyo Rol Activo contenga el permiso `ROLES`).
+2. IF el Administrador intenta desactivar un Usuario_Acceso y esa acción dejaría al Sistema sin ningún Administrador_Funcional, THEN THE Sistema SHALL rechazar la operación con el código HTTP 400 y un mensaje que indique que el sistema quedaría sin un usuario administrador activo con permiso de Roles.
+3. IF el Administrador intenta cambiar el Rol de un Usuario_Acceso y esa acción dejaría al Sistema sin ningún Administrador_Funcional, THEN THE Sistema SHALL rechazar la operación con el código HTTP 400 y el mismo mensaje.
+4. IF el Administrador intenta desactivar un Rol y esa acción dejaría al Sistema sin ningún Administrador_Funcional, THEN THE Sistema SHALL rechazar la operación con el código HTTP 400 y el mismo mensaje.
+5. IF el Administrador intenta editar un Rol quitándole el permiso `ROLES` o desactivándolo, y esa acción dejaría al Sistema sin ningún Administrador_Funcional, THEN THE Sistema SHALL rechazar la operación con el código HTTP 400 y el mismo mensaje.
+6. WHERE la operación no dejaría al Sistema sin Administrador_Funcional (por ejemplo, porque existe otro Usuario_Acceso Activo con un Rol Activo que contiene `ROLES`), THE Sistema SHALL permitir la operación.

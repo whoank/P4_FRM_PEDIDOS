@@ -34,11 +34,22 @@ from schemas import (
 # Dependencia de autorizacion: exige el permiso "ROLES".
 from auth_dependencies import require_permission
 
-# Codigo de permiso que protege este modulo (gestion de roles).
-from roles_service import PERMISOS_MENU  # noqa: F401  (documenta el catalogo)
+# Catalogo de permisos (documenta el conjunto) y la funcion central del
+# invariante de acceso administrativo.
+from roles_service import (  # noqa: F401  (PERMISOS_MENU documenta el catalogo)
+    PERMISOS_MENU,
+    existe_admin_tras_cambio,
+)
 
 # APIRouter con prefijo /api; las rutas concretas se declaran abajo.
 router = APIRouter(prefix="/api", tags=["roles"])
+
+# Mensaje unico cuando una operacion sobre roles dejaria al sistema sin acceso
+# administrativo (sin ningun usuario activo con rol activo que tenga ROLES).
+MENSAJE_SIN_ADMIN = (
+    "No se puede completar: el sistema quedaría sin ningún usuario "
+    "administrador activo con permiso de Roles."
+)
 
 
 # ---------------------------------------------------------------------------
@@ -203,6 +214,19 @@ def actualizar_rol(
     _validar_nombre_unico(nombre, db, excluir_id=rol.id)
     permisos = _resolver_permisos(datos.permisos, db)
 
+    # Invariante de acceso administrativo: editar el rol (cambiar su estado
+    # `activo` o quitarle el permiso ROLES) no debe dejar al sistema sin ningun
+    # usuario activo con rol activo que tenga ROLES. Simulamos el estado
+    # resultante de ESTE rol (nuevo `activo` y nuevo conjunto de codigos).
+    codigos_resultantes = {permiso.codigo for permiso in permisos}
+    if not existe_admin_tras_cambio(
+        db, rol_override=(rol.id, datos.activo, codigos_resultantes)
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=MENSAJE_SIN_ADMIN,
+        )
+
     rol.nombre = nombre
     rol.descripcion = datos.descripcion
     rol.activo = datos.activo
@@ -223,61 +247,27 @@ def cambiar_estado_rol(
     db: Session = Depends(get_db),
     _usuario: User = Depends(require_permission("ROLES")),
 ) -> RolRespuesta:
-    """Activa o desactiva un rol, con una salvaguarda de acceso administrativo.
+    """Activa o desactiva un rol, protegiendo el invariante de acceso administrativo.
 
-    REGLA DE SALVAGUARDA (documentada): no se permite DESACTIVAR un rol si es el
-    UNICO rol activo que otorga el permiso "ROLES" a al menos un usuario ACTIVO.
-    Es decir, si al desactivarlo el sistema quedaria sin ningun rol activo (con
-    "ROLES") asignado a un usuario activo, se rechaza con 400. Asi se evita
-    bloquear el acceso a la propia gestion de roles/usuarios.
-    Activar un rol siempre es seguro.
+    REGLA (obligatoria): el sistema NUNCA debe quedar sin al menos un usuario
+    ACTIVO con un ROL ACTIVO que contenga el permiso ROLES. Al DESACTIVAR un rol
+    se comprueba, mediante la funcion central existe_admin_tras_cambio, que tras
+    el cambio siga existiendo ese acceso; si no, se rechaza con 400. Activar un
+    rol nunca reduce el acceso, por lo que no requiere comprobacion.
     """
     rol = _obtener_rol_o_404(rol_id, db)
 
-    # Solo hay riesgo al DESACTIVAR (activar nunca reduce el acceso).
+    # Solo hay riesgo al DESACTIVAR (activar nunca reduce el acceso). Simulamos
+    # que este rol queda inactivo, conservando su conjunto de permisos actual.
     if not datos.activo and rol.activo:
-        # ?Este rol otorga actualmente el permiso "ROLES"?
-        rol_da_roles = any(
-            permiso.codigo == "ROLES" and permiso.activo for permiso in rol.permisos
-        )
-        if rol_da_roles:
-            # ?Hay al menos un usuario activo con este rol? (dependen de el)
-            hay_usuario_activo = (
-                db.query(User)
-                .filter(User.role_id == rol.id, User.active.is_(True))
-                .first()
-                is not None
+        codigos_actuales = {permiso.codigo for permiso in rol.permisos}
+        if not existe_admin_tras_cambio(
+            db, rol_override=(rol.id, False, codigos_actuales)
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=MENSAJE_SIN_ADMIN,
             )
-            if hay_usuario_activo:
-                # ?Existe OTRO rol activo que tambien otorgue "ROLES" a algun
-                # usuario activo? Si no, este es el unico soporte de acceso.
-                otro_soporte = False
-                otros_roles = (
-                    db.query(Role)
-                    .filter(Role.id != rol.id, Role.activo.is_(True))
-                    .all()
-                )
-                for otro in otros_roles:
-                    otorga_roles = any(
-                        p.codigo == "ROLES" and p.activo for p in otro.permisos
-                    )
-                    if not otorga_roles:
-                        continue
-                    tiene_usuario_activo = (
-                        db.query(User)
-                        .filter(User.role_id == otro.id, User.active.is_(True))
-                        .first()
-                        is not None
-                    )
-                    if tiene_usuario_activo:
-                        otro_soporte = True
-                        break
-
-                if not otro_soporte:
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail="No se puede desactivar: el sistema quedaría sin acceso administrativo.",
-                    )
 
     rol.activo = datos.activo
     db.commit()

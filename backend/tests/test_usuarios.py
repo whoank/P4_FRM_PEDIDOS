@@ -378,3 +378,156 @@ def test_hashes_nunca_aparecen_en_respuestas(entorno):
     for item in lista:
         assert "password_hash" not in item
         assert "token_hash" not in item
+
+
+# ===========================================================================
+# Invariante de acceso administrativo (funcion central existe_admin_tras_cambio)
+# ---------------------------------------------------------------------------
+# El sistema NUNCA debe quedar sin al menos UN usuario ACTIVO con un ROL ACTIVO
+# que contenga el permiso ROLES. Estas pruebas cubren las vias que podrian
+# romperlo desde el router de usuarios: desactivar usuario y cambiar su rol.
+#
+# Nota: se importan aqui (al final) utilidades adicionales; el resto del archivo
+# ya fijo DATABASE_URL a SQLite antes de importar database.
+# ===========================================================================
+from models import Permission  # noqa: E402
+
+
+def _entorno_roles():
+    """Crea una app de prueba con el router de USUARIOS y el catalogo de roles.
+
+    Devuelve (client, TestingSessionLocal, set_usuario_actual). El catalogo de
+    permisos se siembra con seed_roles_y_permisos. Se puede cambiar que usuario
+    resuelve get_current_user con set_usuario_actual, para simular a un
+    administrador que opera sobre otros usuarios.
+    """
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    Base.metadata.create_all(bind=engine)
+
+    estado = {"user_id": None}
+
+    # Sembrar catalogo de permisos + rol Administrador (con ROLES).
+    db = TestingSessionLocal()
+    try:
+        seed_roles_y_permisos(db)
+        rol_admin = db.query(Role).filter(Role.nombre == "Administrador").first()
+        # Usuario administrador que operara (tiene USUARIOS via rol Administrador).
+        admin = User(
+            username="operador_admin",
+            password_hash=hash_password("admin123"),
+            active=True,
+            role_id=rol_admin.id,
+        )
+        db.add(admin)
+        db.commit()
+        estado["user_id"] = admin.id
+        rol_admin_id = rol_admin.id
+    finally:
+        db.close()
+
+    def override_get_db():
+        db = TestingSessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+
+    def override_get_current_user():
+        db = TestingSessionLocal()
+        try:
+            return (
+                db.query(User)
+                .options(joinedload(User.role).joinedload(Role.permisos))
+                .filter(User.id == estado["user_id"])
+                .first()
+            )
+        finally:
+            db.close()
+
+    app = FastAPI()
+    app.include_router(usuarios_router.router)
+    app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_current_user] = override_get_current_user
+
+    client = TestClient(app)
+    return client, TestingSessionLocal, rol_admin_id
+
+
+def _crear_rol_con(SessionLocal, nombre, codigos, activo=True):
+    db = SessionLocal()
+    try:
+        permisos = (
+            db.query(Permission).filter(Permission.codigo.in_(set(codigos))).all()
+            if codigos
+            else []
+        )
+        rol = Role(nombre=nombre, descripcion=None, activo=activo)
+        rol.permisos = permisos
+        db.add(rol)
+        db.commit()
+        db.refresh(rol)
+        return rol.id
+    finally:
+        db.close()
+
+
+def _crear_user(SessionLocal, username, role_id=None, active=True):
+    db = SessionLocal()
+    try:
+        u = User(
+            username=username,
+            password_hash=hash_password("secreta1"),
+            active=active,
+            role_id=role_id,
+        )
+        db.add(u)
+        db.commit()
+        db.refresh(u)
+        return u.id
+    finally:
+        db.close()
+
+
+def test_no_desactivar_ultimo_usuario_admin():
+    """Desactivar al unico usuario activo con rol que da ROLES -> 400."""
+    client, SessionLocal, _rol_admin_id = _entorno_roles()
+    # El unico usuario con ROLES es "operador_admin" (el actual). Intentar
+    # desactivarlo debe rechazarse (quedaria el sistema sin admin).
+    yo = (
+        SessionLocal().query(User).filter(User.username == "operador_admin").first()
+    )
+    respuesta = client.patch(f"/api/usuarios/{yo.id}/desactivar")
+    assert respuesta.status_code == 400
+    assert "administrador" in respuesta.json()["detail"].lower()
+
+
+def test_desactivar_admin_permitido_si_hay_otro():
+    """Si existe OTRO usuario activo con ROLES, desactivar uno si se permite."""
+    client, SessionLocal, rol_admin_id = _entorno_roles()
+    # Creamos un segundo administrador activo con el mismo rol (que da ROLES).
+    otro_id = _crear_user(SessionLocal, "admin2", role_id=rol_admin_id, active=True)
+
+    respuesta = client.patch(f"/api/usuarios/{otro_id}/desactivar")
+    # Se permite porque queda "operador_admin" como soporte administrativo.
+    assert respuesta.status_code == 200
+    assert respuesta.json()["active"] is False
+
+
+def test_no_cambiar_rol_del_ultimo_admin_a_uno_sin_roles():
+    """Cambiar el rol del unico admin a uno SIN ROLES -> 400."""
+    client, SessionLocal, _rol_admin_id = _entorno_roles()
+    # Rol sin el permiso ROLES.
+    rol_sin_roles = _crear_rol_con(SessionLocal, "SoloPedidos", ["PEDIDOS"])
+    yo = (
+        SessionLocal().query(User).filter(User.username == "operador_admin").first()
+    )
+    respuesta = client.patch(
+        f"/api/usuarios/{yo.id}/rol", json={"role_id": rol_sin_roles}
+    )
+    assert respuesta.status_code == 400
+    assert "administrador" in respuesta.json()["detail"].lower()

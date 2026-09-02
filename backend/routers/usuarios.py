@@ -43,12 +43,23 @@ from models import Role
 # Servicios de autenticacion reutilizados: hashing seguro e invalidacion de sesiones.
 from auth_service import hash_password, invalidar_sesiones_usuario
 
+# Invariante de acceso administrativo: el sistema nunca debe quedar sin un
+# usuario activo con rol activo que tenga el permiso ROLES.
+from roles_service import existe_admin_tras_cambio
+
 # Dependencia de autorizacion: protege todos los endpoints exigiendo el permiso
 # "USUARIOS" (require_permission valida sesion 401 + 403 si falta el permiso).
 from auth_dependencies import require_permission
 
 # APIRouter con prefijo comun y etiqueta para la documentacion automatica.
 router = APIRouter(prefix="/api/usuarios", tags=["usuarios"])
+
+# Mensaje unico cuando una operacion dejaria al sistema sin acceso
+# administrativo (sin ningun usuario activo con rol activo que tenga ROLES).
+MENSAJE_SIN_ADMIN = (
+    "No se puede completar: el sistema quedaría sin ningún usuario "
+    "administrador activo con permiso de Roles."
+)
 
 
 # ---------------------------------------------------------------------------
@@ -221,6 +232,19 @@ def desactivar_usuario(
     seguir operando con una cookie vigente; 404 si el usuario no existe.
     """
     usuario = _obtener_usuario_o_404(user_id, db)
+
+    # Invariante de acceso administrativo: no permitir desactivar a este usuario
+    # si al hacerlo el sistema quedaria sin ningun usuario activo con rol activo
+    # que tenga el permiso ROLES. Simulamos el estado resultante (este usuario
+    # inactivo) sin aplicar el cambio todavia.
+    if not existe_admin_tras_cambio(
+        db, usuario_override=(usuario.id, False, usuario.role_id)
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=MENSAJE_SIN_ADMIN,
+        )
+
     usuario.active = False
     db.commit()
     # Cerramos todas las sesiones del usuario tras la baja logica.
@@ -295,6 +319,18 @@ def cambiar_rol_usuario(
 
     # Valida que, si se envia rol, exista y este activo.
     _validar_rol_activo(datos.role_id, db)
+
+    # Invariante de acceso administrativo: cambiar el rol de este usuario no debe
+    # dejar al sistema sin ningun usuario activo con rol activo que tenga ROLES.
+    # Simulamos que este usuario queda con el nuevo role_id (conservando su
+    # estado active actual).
+    if not existe_admin_tras_cambio(
+        db, usuario_override=(usuario.id, usuario.active, datos.role_id)
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=MENSAJE_SIN_ADMIN,
+        )
 
     usuario.role_id = datos.role_id
     db.commit()

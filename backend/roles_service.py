@@ -22,6 +22,10 @@ from sqlalchemy.orm import Session
 
 from models import Permission, Role, User
 
+# Codigo del permiso que habilita la gestion de Roles (y, por extension, el
+# acceso administrativo minimo que el sistema NUNCA debe perder).
+PERMISO_ROLES = "ROLES"
+
 
 # ---------------------------------------------------------------------------
 # Catalogo de permisos del menu
@@ -75,6 +79,93 @@ def codigos_permisos_validos(db: Session) -> set[str]:
     """
     filas = db.query(Permission.codigo).all()
     return {codigo for (codigo,) in filas}
+
+
+# ---------------------------------------------------------------------------
+# Invariante de acceso administrativo (funcion central)
+# ---------------------------------------------------------------------------
+# REGLA (obligatoria): el sistema NUNCA debe quedar sin al menos UN usuario
+# ACTIVO con un ROL ACTIVO que contenga el permiso "ROLES". Si se pierde, nadie
+# podria volver a entrar a la gestion de Roles/Usuarios y el sistema quedaria
+# bloqueado administrativamente.
+#
+# Esta funcion es la UNICA fuente de verdad del invariante. La invocan las
+# cuatro operaciones que podrian romperlo:
+#   1. Desactivar un usuario (usuarios: desactivar).
+#   2. Cambiar el rol de un usuario (usuarios: cambiar rol).
+#   3. Editar un rol (roles: PUT) quitandole ROLES o desactivandolo.
+#   4. Desactivar un rol (roles: PATCH estado).
+#
+# Para poder evaluar el estado *resultante* de un cambio ANTES de aplicarlo (sin
+# depender de commits), acepta "overrides" hipoteticos que describen el cambio
+# propuesto:
+#   - usuario_override = (user_id, activo, role_id): simula que ese usuario
+#     quedaria con ese `activo` y ese `role_id`.
+#   - rol_override = (role_id, activo, codigos_permisos): simula que ese rol
+#     quedaria con ese `activo` y ese conjunto de codigos de permiso.
+# Cualquiera puede ser None (sin override para esa entidad).
+
+
+def _rol_otorga_roles(
+    rol: Role, rol_override: tuple[int, bool, set[str]] | None
+) -> bool:
+    """Indica si un rol (considerando un posible override) esta ACTIVO y otorga ROLES.
+
+    Si `rol_override` corresponde a este rol, se usan el `activo` y los codigos
+    del override (estado hipotetico tras el cambio); en caso contrario se usa el
+    estado real del rol en la BD.
+    """
+    if rol_override is not None and rol_override[0] == rol.id:
+        _, activo_hipotetico, codigos_hipoteticos = rol_override
+        return activo_hipotetico and (PERMISO_ROLES in codigos_hipoteticos)
+
+    # Estado real: rol activo con el permiso ROLES activo entre sus permisos.
+    if not rol.activo:
+        return False
+    return any(
+        permiso.codigo == PERMISO_ROLES and permiso.activo
+        for permiso in rol.permisos
+    )
+
+
+def existe_admin_tras_cambio(
+    db: Session,
+    usuario_override: tuple[int, bool, int | None] | None = None,
+    rol_override: tuple[int, bool, set[str]] | None = None,
+) -> bool:
+    """Indica si, tras el cambio propuesto, seguiria existiendo acceso administrativo.
+
+    Devuelve True si existe al menos UN usuario ACTIVO cuyo ROL este ACTIVO y
+    contenga el permiso ROLES, considerando los overrides hipoteticos. Se usa
+    para bloquear operaciones que dejarian al sistema sin administrador.
+
+    Args:
+        usuario_override: (user_id, activo, role_id) estado hipotetico de un
+            usuario que se esta por modificar (o None).
+        rol_override: (role_id, activo, codigos_permisos) estado hipotetico de
+            un rol que se esta por modificar (o None).
+    """
+    # Precalcula, por rol, si (con override) otorgaria ROLES estando activo.
+    roles = db.query(Role).all()
+    rol_otorga: dict[int, bool] = {
+        rol.id: _rol_otorga_roles(rol, rol_override) for rol in roles
+    }
+
+    # Recorre los usuarios aplicando el override de usuario si corresponde.
+    usuarios = db.query(User).all()
+    for usuario in usuarios:
+        if usuario_override is not None and usuario_override[0] == usuario.id:
+            _, activo, role_id = usuario_override
+        else:
+            activo, role_id = usuario.active, usuario.role_id
+
+        if not activo or role_id is None:
+            continue
+        if rol_otorga.get(role_id, False):
+            # Hay al menos un usuario activo con un rol activo que da ROLES.
+            return True
+
+    return False
 
 
 # ---------------------------------------------------------------------------
