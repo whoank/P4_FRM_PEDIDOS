@@ -16,7 +16,10 @@
 //
 // Requerimientos: 1.1, 1.2, 1.3, 13.1, 13.2
 import { useState } from 'react'
-import MenuLateral, { OPCIONES_MENU } from './componentes/MenuLateral.jsx'
+import MenuLateral, {
+  OPCIONES_MENU,
+  tienePermisoDeSeccion,
+} from './componentes/MenuLateral.jsx'
 import Inicio from './secciones/Inicio.jsx'
 import Clientes from './secciones/Clientes.jsx'
 import Productos from './secciones/Productos.jsx'
@@ -37,7 +40,8 @@ const ETIQUETAS_SECCION = OPCIONES_MENU.reduce((acc, opcion) => {
 // MenuLateral + topbar + secciones). Solo se le anade el paso de la prop
 // `onCerrarSesion` al MenuLateral, conectada al logout del contexto de auth.
 function AppAutenticada() {
-  const { logout } = useAuth()
+  // Ademas de logout, tomamos hasPermission para proteger secciones sin permiso.
+  const { logout, hasPermission } = useAuth()
 
   // 'inicio' por defecto: la app muestra la seccion Inicio al abrirse (Req. 13.1).
   const [seccionActiva, setSeccionActiva] = useState('inicio')
@@ -58,6 +62,13 @@ function AppAutenticada() {
   const renderSeccion = SECCIONES[seccionActiva] || SECCIONES.inicio
   const etiquetaActual = ETIQUETAS_SECCION[seccionActiva] || 'Inicio'
 
+  // Proteccion centralizada: aunque el menu ya oculta las opciones sin permiso,
+  // validamos tambien al renderizar para que forzar `seccionActiva` no muestre
+  // una seccion restringida. Reutiliza la MISMA regla que el menu
+  // (tienePermisoDeSeccion vive en MenuLateral.jsx: unica fuente de verdad).
+  // 'inicio' siempre es accesible, por lo que el arranque no se rompe.
+  const puedeAcceder = tienePermisoDeSeccion(seccionActiva, hasPermission)
+
   return (
     <div className="layout">
       {/* Menu lateral: recibe la seccion activa y notifica el cambio (Req. 1).
@@ -77,8 +88,26 @@ function AppAutenticada() {
           </p>
         </header>
 
-        {/* Contenedor de la seccion activa. */}
-        <main className="seccion">{renderSeccion()}</main>
+        {/* Contenedor de la seccion activa. Si el usuario no tiene permiso
+            para la seccion, NO se renderiza el componente: se muestra un aviso
+            dentro de una tarjeta simple (defensa en profundidad de UX). */}
+        <main className="seccion">
+          {puedeAcceder ? (
+            renderSeccion()
+          ) : (
+            <section
+              style={{
+                backgroundColor: 'var(--color-surface)',
+                borderRadius: 'var(--radius-md)',
+                boxShadow: 'var(--shadow-card)',
+                padding: 'var(--space-5)',
+                color: 'var(--color-text-secondary)',
+              }}
+            >
+              No tienes permiso para ver esta sección.
+            </section>
+          )}
+        </main>
       </div>
     </div>
   )

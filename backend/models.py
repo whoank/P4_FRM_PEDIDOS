@@ -16,6 +16,7 @@ from sqlalchemy import (
     Integer,
     Numeric,
     String,
+    Table,
     func,
     text,
 )
@@ -168,9 +169,17 @@ class User(Base):
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
     # last_login: ultimo inicio de sesion exitoso; nulo hasta el primer login.
     last_login = Column(DateTime, nullable=True)
+    # role_id: FK al rol asignado al usuario. Es nullable=True a proposito para
+    # NO romper las filas de usuarios que ya existian antes de anadir Roles; el
+    # seed idempotente (roles_service.seed_roles_y_permisos) asignara el rol
+    # "Administrador" a todos los usuarios que quedaron con role_id NULL.
+    # Indexado para acelerar el join usuario -> rol.
+    role_id = Column(Integer, ForeignKey("roles.id"), nullable=True, index=True)
 
     # Relacion inversa hacia las sesiones activas del usuario (opcional, comoda).
     sesiones = relationship("UserSession", back_populates="usuario")
+    # Relacion hacia el rol del usuario (uno-a-muchos: un rol tiene varios usuarios).
+    role = relationship("Role", back_populates="usuarios")
 
 
 class UserSession(Base):
@@ -196,6 +205,108 @@ class UserSession(Base):
 
     # Relacion hacia el usuario dueno de la sesion.
     usuario = relationship("User", back_populates="sesiones")
+
+
+# ---------------------------------------------------------------------------
+# Modelos de Roles y Permisos por opcion de menu (modulo de autorizacion)
+# ---------------------------------------------------------------------------
+# Estos modelos implementan el control de acceso por opcion de menu:
+#   - Permission: cada permiso corresponde a una opcion del menu (Clientes,
+#     Productos, etc.). El "codigo" es el identificador de seguridad interno.
+#   - Role: agrupa un conjunto de permisos; cada usuario tiene 0..1 rol.
+#   - role_permissions: tabla asociativa muchos-a-muchos entre roles y permisos.
+# Al heredar de Base quedan registrados en Base.metadata, por lo que
+# crear_tablas() (Base.metadata.create_all) creara sus tablas automaticamente
+# SIN necesidad de migraciones (decision del proyecto: NO usar Alembic).
+
+
+# Tabla asociativa muchos-a-muchos entre roles y permisos. La clave primaria
+# compuesta (role_id, permission_id) evita filas duplicadas (un mismo permiso
+# no se puede asociar dos veces al mismo rol). ondelete="CASCADE" limpia las
+# asociaciones automaticamente si se elimina un rol o un permiso.
+role_permissions = Table(
+    "role_permissions",
+    Base.metadata,
+    Column(
+        "role_id",
+        Integer,
+        ForeignKey("roles.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column(
+        "permission_id",
+        Integer,
+        ForeignKey("permissions.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+)
+
+
+class Role(Base):
+    """Rol de acceso que agrupa un conjunto de permisos de menu.
+
+    Un rol puede asignarse a varios usuarios (relacion uno-a-muchos) y tiene
+    varios permisos (relacion muchos-a-muchos via role_permissions).
+    """
+
+    __tablename__ = "roles"
+
+    # id: clave primaria autoincremental.
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    # nombre: unico y obligatorio; indexado para busquedas por nombre.
+    nombre = Column(String(50), unique=True, nullable=False, index=True)
+    # descripcion opcional del rol.
+    descripcion = Column(String(255), nullable=True)
+    # activo: si es False, el rol no otorga permisos (permisos_de_usuario
+    # devolvera vacio). Default True tambien a nivel de base de datos.
+    activo = Column(
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default=text("true"),
+    )
+    # created_at / updated_at: marcas de tiempo gestionadas por la base de datos.
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+    # Relacion muchos-a-muchos con Permission a traves de role_permissions.
+    permisos = relationship(
+        "Permission", secondary=role_permissions, back_populates="roles"
+    )
+    # Relacion uno-a-muchos hacia los usuarios que tienen este rol.
+    usuarios = relationship("User", back_populates="role")
+
+
+class Permission(Base):
+    """Permiso que habilita el acceso a una opcion de menu.
+
+    El "codigo" es el identificador de seguridad interno (por ejemplo
+    "CLIENTES") que el backend comprueba en require_permission; el "nombre" es
+    solo la etiqueta visible en la interfaz (por ejemplo "Clientes").
+    """
+
+    __tablename__ = "permissions"
+
+    # id: clave primaria autoincremental.
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    # codigo: identificador de seguridad, unico y obligatorio; indexado.
+    codigo = Column(String(50), unique=True, nullable=False, index=True)
+    # nombre: etiqueta visible en el menu/formularios (no es el identificador).
+    nombre = Column(String(100), nullable=False)
+    # descripcion opcional del permiso.
+    descripcion = Column(String(255), nullable=True)
+    # activo: permite ocultar/deshabilitar un permiso sin borrarlo.
+    activo = Column(
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default=text("true"),
+    )
+
+    # Relacion muchos-a-muchos con Role a traves de role_permissions.
+    roles = relationship(
+        "Role", secondary=role_permissions, back_populates="permisos"
+    )
 
 
 def crear_tablas() -> None:

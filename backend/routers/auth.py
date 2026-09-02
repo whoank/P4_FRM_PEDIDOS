@@ -18,7 +18,15 @@ from database import get_db
 from models import User
 
 # Esquemas de request/response de autenticacion (schemas.py).
-from schemas import LoginRequest, MensajeRespuesta, UsuarioRespuesta
+from schemas import (
+    LoginRequest,
+    MensajeRespuesta,
+    RolMinimo,
+    UsuarioAutenticado,
+)
+
+# Consulta de permisos efectivos del usuario (modulo de autorizacion).
+from roles_service import permisos_de_usuario
 
 # Configuracion de la cookie de sesion (auth_config.py).
 from auth_config import (
@@ -42,17 +50,39 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 MENSAJE_CREDENCIALES = "Usuario o contraseña incorrectos."
 
 
+def _construir_usuario_autenticado(db: Session, usuario: User) -> UsuarioAutenticado:
+    """Arma el UsuarioAutenticado con su rol (id, nombre) y permisos efectivos.
+
+    El rol es None si el usuario no tiene rol; los permisos se calculan con
+    roles_service.permisos_de_usuario (rol activo + permisos activos). Nunca se
+    exponen password_hash ni tokens.
+    """
+    rol = usuario.role
+    rol_minimo = (
+        RolMinimo(id=rol.id, nombre=rol.nombre) if rol is not None else None
+    )
+    permisos = sorted(permisos_de_usuario(db, usuario))
+    return UsuarioAutenticado(
+        id=usuario.id,
+        username=usuario.username,
+        active=usuario.active,
+        role=rol_minimo,
+        permissions=permisos,
+    )
+
+
 # ---------------------------------------------------------------------------
 # POST /auth/login -> inicia sesion y setea la cookie
 # ---------------------------------------------------------------------------
-@router.post("/login", response_model=UsuarioRespuesta)
+@router.post("/login", response_model=UsuarioAutenticado)
 def login(
     datos: LoginRequest, response: Response, db: Session = Depends(get_db)
-) -> User:
+) -> UsuarioAutenticado:
     """Valida credenciales y, si son correctas, crea la sesion y setea la cookie.
 
     Devuelve 401 con un mensaje generico si el usuario no existe, esta inactivo
-    o la contrasena no coincide (mismo mensaje en los tres casos).
+    o la contrasena no coincide (mismo mensaje en los tres casos). En exito
+    devuelve UsuarioAutenticado con su rol y permisos efectivos.
     """
     # Buscamos el usuario por username (consulta parametrizada via ORM).
     usuario = db.query(User).filter(User.username == datos.username).first()
@@ -83,20 +113,24 @@ def login(
         path="/",
         max_age=SESSION_EXPIRATION_MINUTES * 60,
     )
-    return usuario
+    # Armamos el usuario autenticado con su rol y permisos efectivos.
+    return _construir_usuario_autenticado(db, usuario)
 
 
 # ---------------------------------------------------------------------------
 # GET /auth/me -> usuario autenticado actual
 # ---------------------------------------------------------------------------
-@router.get("/me", response_model=UsuarioRespuesta)
-def me(current_user: User = Depends(get_current_user)) -> User:
-    """Devuelve el usuario de la sesion actual.
+@router.get("/me", response_model=UsuarioAutenticado)
+def me(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> UsuarioAutenticado:
+    """Devuelve el usuario de la sesion actual con su rol y permisos efectivos.
 
-    get_current_user ya devuelve 401 si no hay una sesion valida, por lo que
-    aqui solo hay que retornar el usuario.
+    get_current_user ya devuelve 401 si no hay una sesion valida. Aqui se
+    consulta la base (db) para calcular los permisos del rol del usuario.
     """
-    return current_user
+    return _construir_usuario_autenticado(db, current_user)
 
 
 # ---------------------------------------------------------------------------

@@ -30,15 +30,24 @@ from fastapi.testclient import TestClient
 from hypothesis import given, settings
 from hypothesis import strategies as st
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import joinedload, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from database import Base, get_db
 
 import models
-from models import Cliente, Producto
+from models import Cliente, Producto, Role, User
 
 from routers import pedidos as pedidos_router
+
+# Ajuste de compatibilidad (Roles y Permisos): el router de pedidos usa
+# require_permission("PEDIDOS"), que depende de get_current_user y consulta
+# permisos_de_usuario(db, usuario). En cada ejemplo de Hypothesis sembramos el
+# rol Administrador (todos los permisos) y sobrescribimos get_current_user con un
+# admin que lo tiene en la BD de prueba, para no romper las propiedades.
+from auth_dependencies import get_current_user
+from roles_service import seed_roles_y_permisos
+from auth_service import hash_password
 
 
 def _montar_entorno():
@@ -56,6 +65,22 @@ def _montar_entorno():
     TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     Base.metadata.create_all(bind=engine)
 
+    # Sembrar permisos + rol Administrador y crear un usuario admin con ese rol.
+    db_inicial = TestingSessionLocal()
+    try:
+        admin = User(
+            username="admin",
+            password_hash=hash_password("admin123"),
+            active=True,
+        )
+        db_inicial.add(admin)
+        db_inicial.commit()
+        seed_roles_y_permisos(db_inicial)
+        admin = db_inicial.query(User).filter(User.username == "admin").first()
+        admin_id = admin.id
+    finally:
+        db_inicial.close()
+
     def override_get_db():
         db = TestingSessionLocal()
         try:
@@ -63,9 +88,24 @@ def _montar_entorno():
         finally:
             db.close()
 
+    def override_get_current_user():
+        # joinedload del rol + permisos para evitar DetachedInstanceError al
+        # leerlos en require_permission tras cerrar esta sesion.
+        db = TestingSessionLocal()
+        try:
+            return (
+                db.query(User)
+                .options(joinedload(User.role).joinedload(Role.permisos))
+                .filter(User.id == admin_id)
+                .first()
+            )
+        finally:
+            db.close()
+
     app = FastAPI()
     app.include_router(pedidos_router.router)
     app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_current_user] = override_get_current_user
     client = TestClient(app)
 
     def cerrar():

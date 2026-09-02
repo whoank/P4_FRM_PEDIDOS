@@ -28,8 +28,10 @@ from schemas import ClienteCrear, ClienteRespuesta
 # Validaciones de negocio puras reutilizadas desde la capa de servicios.
 from services import validar_campo_obligatorio, validar_longitud_maxima
 
-# Dependencia de autenticacion: protege todos los endpoints (requiere sesion).
-from auth_dependencies import get_current_user
+# Dependencia de autorizacion: protege todos los endpoints exigiendo el permiso
+# "CLIENTES" (require_permission ya incluye la validacion de sesion 401 + 403 si
+# el usuario no tiene el permiso). La seguridad real vive en el backend.
+from auth_dependencies import require_permission
 
 # APIRouter con prefijo comun y etiqueta para la documentacion automatica.
 # main.py incluira este router en la Tarea 10.
@@ -96,7 +98,7 @@ def _obtener_cliente_o_404(cliente_id: int, db: Session) -> Cliente:
 # ---------------------------------------------------------------------------
 @router.get("", response_model=list[ClienteRespuesta])
 def listar_clientes(
-    db: Session = Depends(get_db), _usuario=Depends(get_current_user)
+    db: Session = Depends(get_db), _usuario=Depends(require_permission("CLIENTES"))
 ) -> list[Cliente]:
     """Devuelve todos los clientes. Si no hay ninguno, devuelve una lista vacia.
 
@@ -112,7 +114,7 @@ def listar_clientes(
 def crear_cliente(
     datos: ClienteCrear,
     db: Session = Depends(get_db),
-    _usuario=Depends(get_current_user),
+    _usuario=Depends(require_permission("CLIENTES")),
 ) -> Cliente:
     """Crea un nuevo cliente y lo devuelve con su id asignado (201)."""
     # Validaciones de negocio antes de tocar la base de datos (Req. 2.2, 2.3, 2.4).
@@ -138,7 +140,7 @@ def crear_cliente(
 def obtener_cliente(
     cliente_id: int,
     db: Session = Depends(get_db),
-    _usuario=Depends(get_current_user),
+    _usuario=Depends(require_permission("CLIENTES")),
 ) -> Cliente:
     """Devuelve un cliente por su id; responde 404 si no existe (Req. 15.3)."""
     return _obtener_cliente_o_404(cliente_id, db)
@@ -152,7 +154,7 @@ def actualizar_cliente(
     cliente_id: int,
     datos: ClienteCrear,
     db: Session = Depends(get_db),
-    _usuario=Depends(get_current_user),
+    _usuario=Depends(require_permission("CLIENTES")),
 ) -> Cliente:
     """Actualiza los datos de un cliente existente (200); 404 si no existe."""
     # Primero comprobamos que exista (404) antes de validar el cuerpo.

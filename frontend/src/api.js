@@ -184,3 +184,58 @@ export function desactivarUsuario(id) {
 export function cambiarPasswordUsuario(id, datos) {
   return request(`/usuarios/${id}/password`, conCuerpo('PATCH', datos))
 }
+
+// ---------------------------------------------------------------------------
+// Roles y permisos (Administracion > Roles)
+// ---------------------------------------------------------------------------
+//
+// Todos los endpoints de /roles y /permisos exigen el permiso ROLES en el
+// backend (responden 403 si falta). Aqui solo se hace la llamada HTTP; la app
+// oculta la seccion cuando el usuario no tiene el permiso, pero la seguridad
+// real la aplica el backend.
+
+// Lista todos los roles: GET /api/roles.
+// Cada rol trae {id, nombre, descripcion, activo, permisos:[{codigo,nombre}],
+// cantidad_permisos}.
+export function listarRoles() {
+  return request('/roles')
+}
+
+// Obtiene un rol por id: GET /api/roles/{id} (mismo formato que la lista).
+export function obtenerRol(id) {
+  return request(`/roles/${id}`)
+}
+
+// Crea un rol: POST /api/roles.
+// datos: { nombre, descripcion, activo, permisos: [CODIGOS] }.
+export function crearRol(datos) {
+  return request('/roles', conCuerpo('POST', datos))
+}
+
+// Actualiza un rol (reemplaza sus permisos): PUT /api/roles/{id}.
+// datos: { nombre, descripcion, activo, permisos: [CODIGOS] }.
+export function actualizarRol(id, datos) {
+  return request(`/roles/${id}`, conCuerpo('PUT', datos))
+}
+
+// Cambia el estado (activo/inactivo) de un rol: PATCH /api/roles/{id}/estado.
+export function cambiarEstadoRol(id, activo) {
+  return request(`/roles/${id}/estado`, conCuerpo('PATCH', { activo }))
+}
+
+// Lista el catalogo de permisos disponibles: GET /api/permisos.
+// Cada permiso trae {codigo, nombre}. Se usa para los checkboxes del formulario.
+export function listarPermisos() {
+  return request('/permisos')
+}
+
+// ---------------------------------------------------------------------------
+// Rol de usuario (Administracion > Gestion de Usuarios)
+// ---------------------------------------------------------------------------
+
+// Asigna (o cambia) el rol de un usuario: PATCH /api/usuarios/{id}/rol.
+// body: { role_id }. El backend valida que el rol exista y este activo (400 si
+// no). Requiere permiso USUARIOS.
+export function asignarRolUsuario(id, role_id) {
+  return request(`/usuarios/${id}/rol`, conCuerpo('PATCH', { role_id }))
+}

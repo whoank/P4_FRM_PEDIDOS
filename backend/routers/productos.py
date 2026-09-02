@@ -37,8 +37,9 @@ from services import (
     validar_precio,
 )
 
-# Dependencia de autenticacion: protege todos los endpoints (requiere sesion).
-from auth_dependencies import get_current_user
+# Dependencia de autorizacion: protege todos los endpoints exigiendo el permiso
+# "PRODUCTOS" (require_permission valida sesion 401 + 403 si falta el permiso).
+from auth_dependencies import require_permission
 
 # APIRouter con prefijo comun y etiqueta para la documentacion automatica.
 # main.py incluira este router en la Tarea 10.
@@ -98,7 +99,7 @@ def _obtener_producto_o_404(producto_id: int, db: Session) -> Producto:
 def listar_productos(
     solo_disponibles: bool = False,
     db: Session = Depends(get_db),
-    _usuario=Depends(get_current_user),
+    _usuario=Depends(require_permission("PRODUCTOS")),
 ) -> list[Producto]:
     """Devuelve la lista de productos.
 
@@ -122,7 +123,7 @@ def listar_productos(
 def crear_producto(
     datos: ProductoCrear,
     db: Session = Depends(get_db),
-    _usuario=Depends(get_current_user),
+    _usuario=Depends(require_permission("PRODUCTOS")),
 ) -> Producto:
     """Crea un nuevo producto y lo devuelve con su id asignado (201).
 
@@ -153,7 +154,7 @@ def crear_producto(
 def obtener_producto(
     producto_id: int,
     db: Session = Depends(get_db),
-    _usuario=Depends(get_current_user),
+    _usuario=Depends(require_permission("PRODUCTOS")),
 ) -> Producto:
     """Devuelve un producto por su id; responde 404 si no existe (Req. 15.3)."""
     return _obtener_producto_o_404(producto_id, db)
@@ -167,7 +168,7 @@ def actualizar_producto(
     producto_id: int,
     datos: ProductoCrear,
     db: Session = Depends(get_db),
-    _usuario=Depends(get_current_user),
+    _usuario=Depends(require_permission("PRODUCTOS")),
 ) -> Producto:
     """Actualiza los datos de un producto existente (200); 404 si no existe.
 

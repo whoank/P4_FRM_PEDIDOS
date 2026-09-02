@@ -21,15 +21,16 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import joinedload, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 # Base y get_db reales; get_db se sobrescribe con la version de prueba.
 from database import Base, get_db
 
-# Importar models registra las tablas (incluidas users y user_session) en Base.metadata.
+# Importar models registra las tablas (incluidas users, user_session, roles y
+# permissions) en Base.metadata.
 import models
-from models import User, UserSession
+from models import Role, User, UserSession
 
 # Router bajo prueba y dependencia de autenticacion a sobrescribir.
 from routers import usuarios as usuarios_router
@@ -42,6 +43,13 @@ from auth_service import (
     crear_sesion,
     obtener_usuario_por_token,
 )
+
+# Ajuste de compatibilidad (Roles y Permisos): los endpoints de usuarios usan
+# require_permission("USUARIOS"), que consulta permisos_de_usuario(db, usuario).
+# El admin simulado debe tener, EN LA BD DE PRUEBA, un rol con ese permiso. Por
+# eso sembramos el rol Administrador (con TODOS los permisos) tras crear el admin:
+# seed_roles_y_permisos asigna ese rol a los usuarios con role_id NULL (el admin).
+from roles_service import seed_roles_y_permisos
 
 
 @pytest.fixture()
@@ -74,6 +82,9 @@ def entorno():
         db_inicial.commit()
         db_inicial.refresh(admin)
         admin_id = admin.id
+        # Sembrar permisos + rol Administrador y asignarlo al admin (queda con
+        # role_id NULL, y el seed asigna el rol Administrador a esos usuarios).
+        seed_roles_y_permisos(db_inicial)
     finally:
         db_inicial.close()
 
@@ -87,9 +98,17 @@ def entorno():
     def override_get_current_user():
         # Devuelve el administrador consultado en una sesion nueva (robusto):
         # asi el objeto esta asociado a la BD de prueba compartida (StaticPool).
+        # Cargamos de forma anticipada (joinedload) el rol y sus permisos para
+        # que require_permission("USUARIOS") pueda leerlos tras cerrar la sesion
+        # sin provocar un DetachedInstanceError.
         db = TestingSessionLocal()
         try:
-            return db.get(User, admin_id)
+            return (
+                db.query(User)
+                .options(joinedload(User.role).joinedload(Role.permisos))
+                .filter(User.id == admin_id)
+                .first()
+            )
         finally:
             db.close()
 

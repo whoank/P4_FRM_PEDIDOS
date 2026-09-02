@@ -6,8 +6,14 @@
 // contrasena ni tokens).
 //
 // Estado expuesto:
-//  - usuario:  objeto {id, username, active} si hay sesion; null si no.
+//  - usuario:  objeto de sesion si hay sesion; null si no. AHORA incluye
+//    ademas de {id, username, active} los campos `role` ({id, nombre} | null)
+//    y `permissions` (array de codigos de permiso, p. ej. ["CLIENTES","ROLES"]).
 //  - cargando: true mientras se verifica la sesion inicial (evita parpadeos).
+//  - permisos:  array de codigos de permiso derivado de usuario.permissions
+//    (vacio si no hay sesion). Se usa SOLO para UX/navegacion; la seguridad
+//    real la aplica el backend con require_permission.
+//  - hasPermission(codigo): funcion que indica si el usuario tiene ese permiso.
 //  - login(username, password): inicia sesion y guarda el usuario.
 //  - logout(): cierra la sesion y limpia el usuario.
 
@@ -18,6 +24,8 @@ import * as authService from './authService.js'
 const AuthContext = createContext({
   usuario: null,
   cargando: true,
+  permisos: [],
+  hasPermission: () => false,
   login: async () => {},
   logout: async () => {},
 })
@@ -67,7 +75,16 @@ export function AuthProvider({ children }) {
     setUsuario(null)
   }
 
-  const valor = { usuario, cargando, login, logout }
+  // Lista de permisos del usuario, derivada del objeto de sesion. Si no hay
+  // sesion (o el backend no envio permisos), queda como array vacio.
+  const permisos = usuario?.permissions ?? []
+
+  // Indica si el usuario tiene un permiso concreto por su codigo.
+  // Se usa para mostrar/ocultar y bloquear secciones (defensa en profundidad
+  // de UX); la autorizacion real vive en el backend.
+  const hasPermission = (codigo) => permisos.includes(codigo)
+
+  const valor = { usuario, cargando, permisos, hasPermission, login, logout }
 
   return <AuthContext.Provider value={valor}>{children}</AuthContext.Provider>
 }

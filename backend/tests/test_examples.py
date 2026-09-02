@@ -31,17 +31,30 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import joinedload, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 # Base y get_db reales del proyecto; get_db se sobreescribe con la version de prueba.
 from database import Base, get_db
 
-# Importar models registra las tablas (Cliente, Producto, Pedido) en Base.metadata.
+# Importar models registra las tablas (Cliente, Producto, Pedido, User, Role,
+# Permission, ...) en Base.metadata.
 import models  # noqa: F401
+from models import Role, User
 
 # Router bajo prueba.
 from routers import clientes as clientes_router
+
+# Ajuste de compatibilidad (Roles y Permisos): los endpoints ahora usan
+# require_permission("CLIENTES"), que internamente depende de get_current_user y
+# consulta permisos_de_usuario(db, usuario). Para no romper estas pruebas de
+# negocio, sembramos el catalogo de permisos + rol Administrador (con TODOS los
+# permisos) y sobrescribimos get_current_user para devolver un usuario admin que,
+# EN LA BD DE PRUEBA, tiene ese rol. Asi todos los endpoints protegidos pasan la
+# autorizacion sin cambiar los asserts de negocio.
+from auth_dependencies import get_current_user
+from roles_service import seed_roles_y_permisos
+from auth_service import hash_password
 
 
 @pytest.fixture()
@@ -64,6 +77,24 @@ def client():
     # Crear el esquema sobre el engine de prueba.
     Base.metadata.create_all(bind=engine)
 
+    # Sembrar permisos + rol Administrador y crear un usuario admin con ese rol
+    # (para superar require_permission). El seed asigna el rol Administrador a
+    # todos los usuarios con role_id NULL, incluido el admin recien creado.
+    db_inicial = TestingSessionLocal()
+    try:
+        admin = User(
+            username="admin",
+            password_hash=hash_password("admin123"),
+            active=True,
+        )
+        db_inicial.add(admin)
+        db_inicial.commit()
+        seed_roles_y_permisos(db_inicial)
+        admin = db_inicial.query(User).filter(User.username == "admin").first()
+        admin_id = admin.id
+    finally:
+        db_inicial.close()
+
     def override_get_db():
         db = TestingSessionLocal()
         try:
@@ -71,9 +102,26 @@ def client():
         finally:
             db.close()
 
+    def override_get_current_user():
+        # Usuario admin (con rol Administrador en la BD de prueba) para pasar la
+        # autorizacion de require_permission en los endpoints protegidos. Cargamos
+        # de forma anticipada (joinedload) el rol y sus permisos para evitar un
+        # DetachedInstanceError al leerlos tras cerrar esta sesion.
+        db = TestingSessionLocal()
+        try:
+            return (
+                db.query(User)
+                .options(joinedload(User.role).joinedload(Role.permisos))
+                .filter(User.id == admin_id)
+                .first()
+            )
+        finally:
+            db.close()
+
     app = FastAPI()
     app.include_router(clientes_router.router)
     app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_current_user] = override_get_current_user
 
     with TestClient(app) as test_client:
         yield test_client

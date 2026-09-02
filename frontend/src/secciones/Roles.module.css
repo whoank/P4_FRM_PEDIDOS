@@ -1,0 +1,245 @@
+/*
+  Estilos de la seccion Roles (Administracion > Roles).
+  Reutiliza EXCLUSIVAMENTE las variables CSS (tokens) definidas en index.css
+  (:root). Mismo patron visual que GestionUsuarios.module.css: tarjetas,
+  formulario, tabla, badges y mensajes. No edita CSS globales.
+*/
+
+/* Contenedor vertical de las tarjetas de la seccion (formulario + lista). */
+.roles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* Tarjeta blanca reutilizable (formulario y lista). */
+.tarjeta {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-5);
+}
+
+/* Cabecera de tarjeta: titulo a la izquierda y accion a la derecha. */
+.cabeceraTarjeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+/* Titulo de tarjeta. */
+.tituloTarjeta {
+  margin: 0;
+  font-size: var(--font-size-card-title);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+/* Formulario: campos en columna. */
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Cada campo agrupa la etiqueta ENCIMA del input. */
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* Etiqueta encima del input, en texto secundario. */
+.etiqueta {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Input y textarea con borde sutil y esquinas redondeadas. */
+.input {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body);
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  resize: vertical;
+}
+
+/* Foco visible con anillo de acento (cian). */
+.input:focus {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+  border-color: var(--color-accent);
+}
+
+/* Campo checkbox horizontal (etiqueta + casilla), p. ej. "Activo". */
+.campoCheckbox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.campoCheckbox label {
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+}
+
+/* Grupo de checkboxes de permisos en rejilla. */
+.grupoCheckboxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-content-bg);
+}
+
+/* Cada checkbox de permiso: casilla + etiqueta del permiso. */
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-small);
+  color: var(--color-text);
+}
+
+/* Fila de acciones del formulario (botones). */
+.acciones {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+/* Boton primario azul (Guardar / Crear rol). */
+.botonPrimario {
+  padding: var(--space-2) var(--space-5);
+  border: none;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-primary);
+  color: #ffffff;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.botonPrimario:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.botonPrimario:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+/* Boton secundario tipo texto (Cancelar). */
+.botonSecundario {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body);
+  cursor: pointer;
+}
+
+.botonSecundario:hover {
+  border-color: var(--color-primary);
+}
+
+/* Mensaje de error de validacion, en rojo. */
+.error {
+  margin: 0;
+  color: var(--color-error);
+  font-size: var(--font-size-small);
+}
+
+/* Mensaje de exito, en color de acento para diferenciarlo del error. */
+.exito {
+  margin: 0;
+  color: var(--color-accent);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Tabla de roles dentro de la tarjeta. */
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Encabezado de tabla en gris y tamano pequeno. */
+.tabla th {
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-medium);
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* Celdas con separador sutil entre filas. */
+.tabla td {
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  vertical-align: top;
+}
+
+/* Badge de estado: base comun (pildora pequena). */
+.badge {
+  display: inline-block;
+  padding: 2px var(--space-2);
+  border-radius: 999px;
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.4;
+}
+
+/* Estado Activo: verde sobrio. */
+.badgeActivo {
+  background-color: #DCFCE7;
+  color: #15803D;
+}
+
+/* Estado Inactivo: gris tenue reutilizando tokens de borde/texto. */
+.badgeInactivo {
+  background-color: var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+/* Contenedor de los botones de accion de cada fila. */
+.accionesFila {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+/* Boton de accion tipo texto en color de acento (editar, activar/desactivar). */
+.botonAccion {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--color-accent);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-small);
+  cursor: pointer;
+}
+
+.botonAccion:hover {
+  text-decoration: underline;
+}
+
+/* Mensaje cuando no hay roles registrados. */
+.vacio {
+  margin: 0;
+  color: var(--color-text-secondary);
+}

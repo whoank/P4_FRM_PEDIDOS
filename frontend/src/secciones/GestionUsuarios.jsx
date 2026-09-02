@@ -22,11 +22,19 @@ import {
   activarUsuario,
   desactivarUsuario,
   cambiarPasswordUsuario,
+  listarRoles,
+  asignarRolUsuario,
 } from '../api.js'
 import estilos from './GestionUsuarios.module.css'
 
 // Estado inicial vacio del formulario de creacion (campos controlados).
-const FORM_CREAR_VACIO = { username: '', password: '', password_confirmacion: '' }
+// `role_id` como cadena vacia representa "(sin rol)".
+const FORM_CREAR_VACIO = {
+  username: '',
+  password: '',
+  password_confirmacion: '',
+  role_id: '',
+}
 
 // Estado inicial vacio del formulario de cambio de contrasena.
 const FORM_PASSWORD_VACIO = { password: '', password_confirmacion: '' }
@@ -43,6 +51,8 @@ function formatearFecha(valor) {
 function GestionUsuarios() {
   // Lista de usuarios cargada desde el backend.
   const [usuarios, setUsuarios] = useState([])
+  // Roles ACTIVOS disponibles para asignar (poblar los <select> de rol).
+  const [rolesActivos, setRolesActivos] = useState([])
   // Controla si el formulario de creacion esta visible.
   const [mostrarCrear, setMostrarCrear] = useState(false)
   // Valores actuales del formulario de creacion.
@@ -63,6 +73,14 @@ function GestionUsuarios() {
   // Mensaje de error del formulario de cambio de contrasena (rojo).
   const [errorPassword, setErrorPassword] = useState('')
 
+  // id del usuario cuyo formulario inline de cambio de rol esta abierto; null
+  // significa que no hay ninguno abierto.
+  const [rolAbiertoId, setRolAbiertoId] = useState(null)
+  // Valor (role_id como cadena) del select de cambio de rol.
+  const [formRol, setFormRol] = useState('')
+  // Mensaje de error del formulario inline de cambio de rol (rojo).
+  const [errorRol, setErrorRol] = useState('')
+
   // Carga la lista de usuarios desde el backend y la guarda en estado.
   async function cargarUsuarios() {
     try {
@@ -74,9 +92,23 @@ function GestionUsuarios() {
     }
   }
 
-  // Al montar, carga la lista una sola vez.
+  // Carga los roles ACTIVOS desde el backend (para los selects de rol).
+  // Si el usuario no tuviera permiso ROLES el backend responderia 403; en ese
+  // caso simplemente se deja la lista de roles vacia (el select mostrara solo
+  // "(sin rol)") sin romper la gestion de usuarios.
+  async function cargarRolesActivos() {
+    try {
+      const datos = await listarRoles()
+      setRolesActivos((datos || []).filter((rol) => rol.activo === true))
+    } catch (err) {
+      setRolesActivos([])
+    }
+  }
+
+  // Al montar, carga usuarios y roles activos una sola vez.
   useEffect(() => {
     cargarUsuarios()
+    cargarRolesActivos()
   }, [])
 
   // --- Formulario de creacion -------------------------------------------
@@ -122,6 +154,9 @@ function GestionUsuarios() {
         username: formCrear.username,
         password: formCrear.password,
         password_confirmacion: formCrear.password_confirmacion,
+        // role_id es opcional: si se eligio "(sin rol)" (cadena vacia) se envia
+        // null; si se eligio un rol, se convierte a numero.
+        role_id: formCrear.role_id ? Number(formCrear.role_id) : null,
       })
       // Exito: limpiar formulario, cerrarlo, refrescar lista y avisar.
       setFormCrear(FORM_CREAR_VACIO)
@@ -209,6 +244,42 @@ function GestionUsuarios() {
     }
   }
 
+  // --- Formulario inline de cambio de rol -------------------------------
+
+  // Abre el select inline de cambio de rol para un usuario, precargando su rol
+  // actual (o cadena vacia si no tiene).
+  function abrirRol(usuario) {
+    setRolAbiertoId(usuario.id)
+    setFormRol(usuario.role_id != null ? String(usuario.role_id) : '')
+    setErrorRol('')
+    setExito('')
+  }
+
+  // Cierra el select inline de cambio de rol.
+  function cancelarRol() {
+    setRolAbiertoId(null)
+    setFormRol('')
+    setErrorRol('')
+  }
+
+  // Envia el cambio de rol. Llama a asignarRolUsuario; ante exito refresca la
+  // lista y avisa; ante error (p. ej. rol inactivo) muestra el mensaje.
+  async function manejarEnvioRol(evento, id) {
+    evento.preventDefault()
+    setErrorRol('')
+    setExito('')
+
+    try {
+      await asignarRolUsuario(id, formRol ? Number(formRol) : null)
+      setRolAbiertoId(null)
+      setFormRol('')
+      setExito('Rol actualizado.')
+      await cargarUsuarios()
+    } catch (err) {
+      setErrorRol(err.message)
+    }
+  }
+
   return (
     <div className={estilos.usuarios}>
       {/* Tarjeta del formulario de creacion (desplegable). */}
@@ -276,6 +347,27 @@ function GestionUsuarios() {
               />
             </div>
 
+            {/* Campo Rol (opcional): select con los roles activos. */}
+            <div className={estilos.campo}>
+              <label className={estilos.etiqueta} htmlFor="role_id">
+                Rol
+              </label>
+              <select
+                className={estilos.input}
+                id="role_id"
+                name="role_id"
+                value={formCrear.role_id}
+                onChange={manejarCambioCrear}
+              >
+                <option value="">(sin rol)</option>
+                {rolesActivos.map((rol) => (
+                  <option key={rol.id} value={rol.id}>
+                    {rol.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* Mensaje de error de validacion / conexion / duplicado. */}
             {errorCrear && (
               <p className={estilos.error} role="alert">
@@ -322,6 +414,7 @@ function GestionUsuarios() {
               <tr>
                 <th>ID</th>
                 <th>Usuario</th>
+                <th>Rol</th>
                 <th>Estado</th>
                 <th>Fecha de creación</th>
                 <th>Último acceso</th>
@@ -332,10 +425,13 @@ function GestionUsuarios() {
               {usuarios.map((usuario) => {
                 const activo = usuario.active === true
                 const passwordAbierto = passwordAbiertoId === usuario.id
+                const rolAbierto = rolAbiertoId === usuario.id
                 return (
                   <tr key={usuario.id}>
                     <td>{usuario.id}</td>
                     <td>{usuario.username}</td>
+                    {/* Rol asignado (o guion si no tiene). */}
+                    <td>{usuario.role_nombre || '\u2014'}</td>
                     <td>
                       {/* Badge de estado: color + texto (no solo color). */}
                       <span
@@ -378,6 +474,15 @@ function GestionUsuarios() {
                           onClick={() => abrirPassword(usuario.id)}
                         >
                           Cambiar contraseña
+                        </button>
+
+                        {/* Abrir select inline de cambio de rol. */}
+                        <button
+                          className={estilos.botonAccion}
+                          type="button"
+                          onClick={() => abrirRol(usuario)}
+                        >
+                          Cambiar rol
                         </button>
                       </div>
 
@@ -440,6 +545,62 @@ function GestionUsuarios() {
                               className={estilos.botonSecundario}
                               type="button"
                               onClick={cancelarPassword}
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        </form>
+                      )}
+
+                      {/* Formulario inline de cambio de rol. */}
+                      {rolAbierto && (
+                        <form
+                          className={estilos.formularioInline}
+                          onSubmit={(evento) =>
+                            manejarEnvioRol(evento, usuario.id)
+                          }
+                        >
+                          <div className={estilos.campo}>
+                            <label
+                              className={estilos.etiqueta}
+                              htmlFor={`rol-${usuario.id}`}
+                            >
+                              Rol
+                            </label>
+                            <select
+                              className={estilos.input}
+                              id={`rol-${usuario.id}`}
+                              value={formRol}
+                              onChange={(evento) =>
+                                setFormRol(evento.target.value)
+                              }
+                            >
+                              <option value="">(sin rol)</option>
+                              {rolesActivos.map((rol) => (
+                                <option key={rol.id} value={rol.id}>
+                                  {rol.nombre}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {errorRol && (
+                            <p className={estilos.error} role="alert">
+                              {errorRol}
+                            </p>
+                          )}
+
+                          <div className={estilos.acciones}>
+                            <button
+                              className={estilos.botonPrimario}
+                              type="submit"
+                            >
+                              Guardar
+                            </button>
+                            <button
+                              className={estilos.botonSecundario}
+                              type="button"
+                              onClick={cancelarRol}
                             >
                               Cancelar
                             </button>

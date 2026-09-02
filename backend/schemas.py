@@ -250,11 +250,16 @@ class UsuarioCrear(BaseModel):
     hace el router (para devolver un mensaje claro en `detail`), no el schema.
     Las contrasenas nunca se guardan ni se registran en claro: el router genera
     su hash antes de persistir.
+
+    role_id (opcional): rol a asignar al crear el usuario. Si se envia, el
+    router valida que el rol exista y este ACTIVO; si es None, el usuario queda
+    sin rol.
     """
 
     username: str = Field(min_length=1, max_length=50)
     password: str = Field(min_length=1)
     password_confirmacion: str = Field(min_length=1)
+    role_id: Optional[int] = None
 
 
 class UsuarioCambiarPassword(BaseModel):
@@ -283,5 +288,126 @@ class UsuarioListado(BaseModel):
     created_at: datetime | None = None
     updated_at: datetime | None = None
     last_login: datetime | None = None
+    # Rol asignado al usuario (id y, si es facil derivarlo, su nombre visible).
+    # El router rellena role_nombre a partir de la relacion user.role.
+    role_id: int | None = None
+    role_nombre: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+# ---------------------------------------------------------------------------
+# Esquemas de Roles y Permisos por opcion de menu (modulo de autorizacion)
+# ---------------------------------------------------------------------------
+# El "codigo" de un permiso es el identificador de seguridad interno; el
+# "nombre" es solo la etiqueta visible en la interfaz. Ninguno de estos
+# esquemas expone password_hash ni tokens.
+
+
+class PermisoRespuesta(BaseModel):
+    """Response de un permiso del catalogo (codigo interno + etiqueta visible)."""
+
+    codigo: str
+    nombre: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class RolBase(BaseModel):
+    """Campos comunes de un Rol para crear/actualizar.
+
+    - nombre: obligatorio, 1..50 caracteres.
+    - descripcion: opcional, hasta 255 caracteres.
+    - activo: por defecto True.
+    """
+
+    nombre: str = Field(min_length=1, max_length=50)
+    descripcion: Optional[str] = Field(default=None, max_length=255)
+    activo: bool = True
+
+
+class RolCrear(RolBase):
+    """Request para crear un rol. `permisos` es la lista de CODIGOS de permiso."""
+
+    permisos: list[str] = Field(default_factory=list)
+
+
+class RolActualizar(RolBase):
+    """Request para actualizar un rol. `permisos` REEMPLAZA el conjunto actual.
+
+    Contiene la lista completa de CODIGOS de permiso que el rol debe tener tras
+    la actualizacion.
+    """
+
+    permisos: list[str] = Field(default_factory=list)
+
+
+class RolEstado(BaseModel):
+    """Request para activar/desactivar un rol (PATCH .../estado)."""
+
+    activo: bool
+
+
+class RolRespuesta(BaseModel):
+    """Response de un rol con su lista de permisos (codigo + nombre).
+
+    El campo `permisos` se puebla desde role.permisos y `cantidad_permisos` es
+    opcional (el router puede rellenarlo; si no, el frontend cuenta len(permisos)).
+    """
+
+    id: int
+    nombre: str
+    descripcion: Optional[str] = None
+    activo: bool
+    permisos: list[PermisoRespuesta] = []
+    cantidad_permisos: Optional[int] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+# ---------------------------------------------------------------------------
+# Esquemas de autenticacion con rol y permisos (para /auth/login y /auth/me)
+# ---------------------------------------------------------------------------
+
+
+class RolMinimo(BaseModel):
+    """Rol reducido (id + nombre) para incrustar en el usuario autenticado."""
+
+    id: int
+    nombre: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UsuarioAutenticado(BaseModel):
+    """Response del usuario autenticado con su rol y sus permisos efectivos.
+
+    A diferencia de UsuarioRespuesta, incluye:
+      - role: rol reducido (id, nombre) o None si no tiene rol.
+      - permissions: lista de CODIGOS de permiso efectivos.
+    El router arma `role` y `permissions` manualmente (no salen directos del ORM
+    para `permissions`). Nunca expone password_hash ni tokens.
+    """
+
+    id: int
+    username: str
+    active: bool
+    role: Optional[RolMinimo] = None
+    permissions: list[str] = []
+
+
+# ---------------------------------------------------------------------------
+# Ampliaciones de los esquemas de Gestion de Usuarios (asignacion de rol)
+# ---------------------------------------------------------------------------
+
+
+class UsuarioActualizar(BaseModel):
+    """Request para actualizar el rol (y opcionalmente el estado) de un usuario.
+
+    Se usa, por ejemplo, en el endpoint que cambia el rol al editar un usuario.
+    role_id None significa "sin rol". La validacion de que el rol exista y este
+    activo la hace el router.
+    """
+
+    role_id: Optional[int] = None
+    active: Optional[bool] = None

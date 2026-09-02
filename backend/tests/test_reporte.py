@@ -31,18 +31,28 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import joinedload, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 # Base y get_db reales; get_db se sobrescribe con la version de prueba.
 from database import Base, get_db
 
-# Importar models registra las tablas (Cliente, Producto, Pedido) en Base.metadata.
+# Importar models registra las tablas (Cliente, Producto, Pedido, User, Role,
+# Permission, ...) en Base.metadata.
 import models
-from models import Cliente, Pedido, Producto
+from models import Cliente, Pedido, Producto, Role, User
 
 # Router bajo prueba.
 from routers import reporte as reporte_router
+
+# Ajuste de compatibilidad (Roles y Permisos): el endpoint usa
+# require_permission("REPORTE_DIARIO"), que depende de get_current_user y
+# consulta permisos_de_usuario(db, usuario). Sembramos rol Administrador (todos
+# los permisos) y sobrescribimos get_current_user con un admin que lo tiene en la
+# BD de prueba, para no romper los asserts de negocio.
+from auth_dependencies import get_current_user
+from roles_service import seed_roles_y_permisos
+from auth_service import hash_password
 
 
 @pytest.fixture()
@@ -61,6 +71,22 @@ def entorno():
 
     Base.metadata.create_all(bind=engine)
 
+    # Sembrar permisos + rol Administrador y crear un usuario admin con ese rol.
+    db_inicial = TestingSessionLocal()
+    try:
+        admin = User(
+            username="admin",
+            password_hash=hash_password("admin123"),
+            active=True,
+        )
+        db_inicial.add(admin)
+        db_inicial.commit()
+        seed_roles_y_permisos(db_inicial)
+        admin = db_inicial.query(User).filter(User.username == "admin").first()
+        admin_id = admin.id
+    finally:
+        db_inicial.close()
+
     def override_get_db():
         db = TestingSessionLocal()
         try:
@@ -68,9 +94,24 @@ def entorno():
         finally:
             db.close()
 
+    def override_get_current_user():
+        # joinedload del rol + permisos para evitar DetachedInstanceError al
+        # leerlos en require_permission tras cerrar esta sesion.
+        db = TestingSessionLocal()
+        try:
+            return (
+                db.query(User)
+                .options(joinedload(User.role).joinedload(Role.permisos))
+                .filter(User.id == admin_id)
+                .first()
+            )
+        finally:
+            db.close()
+
     app = FastAPI()
     app.include_router(reporte_router.router)
     app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_current_user] = override_get_current_user
 
     with TestClient(app) as test_client:
         yield test_client, TestingSessionLocal

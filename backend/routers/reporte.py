@@ -34,8 +34,9 @@ from schemas import PedidoRespuesta, ResumenReporte
 # Reglas de negocio puras reutilizadas desde la capa de servicios (Tarea 4).
 from services import filtrar_por_fecha, resumir_reporte
 
-# Dependencia de autenticacion: protege el endpoint (requiere sesion).
-from auth_dependencies import get_current_user
+# Dependencia de autorizacion: protege el endpoint exigiendo el permiso
+# "REPORTE_DIARIO" (require_permission valida sesion 401 + 403 si falta).
+from auth_dependencies import require_permission
 
 # APIRouter con prefijo comun y etiqueta para la documentacion automatica.
 # main.py incluira este router en la Tarea 10.
@@ -70,7 +71,7 @@ def _a_respuesta(pedido: Pedido) -> PedidoRespuesta:
 def reporte_diario(
     fecha: date | None = None,
     db: Session = Depends(get_db),
-    _usuario=Depends(get_current_user),
+    _usuario=Depends(require_permission("REPORTE_DIARIO")),
 ) -> ResumenReporte:
     """Devuelve el resumen de pedidos y ventas de un dia.
 

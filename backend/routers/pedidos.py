@@ -36,8 +36,9 @@ from schemas import PedidoCrear, PedidoRespuesta
 # Reglas de negocio puras reutilizadas desde la capa de servicios.
 from services import ESTADOS_VALIDOS, calcular_total, es_estado_valido, producto_seleccionable
 
-# Dependencia de autenticacion: protege todos los endpoints (requiere sesion).
-from auth_dependencies import get_current_user
+# Dependencia de autorizacion: protege todos los endpoints exigiendo el permiso
+# "PEDIDOS" (require_permission valida sesion 401 + 403 si falta el permiso).
+from auth_dependencies import require_permission
 
 # APIRouter con prefijo comun y etiqueta para la documentacion automatica.
 # main.py incluira este router en la Tarea 10.
@@ -110,7 +111,7 @@ def _obtener_pedido_o_404(pedido_id: int, db: Session) -> Pedido:
 # ---------------------------------------------------------------------------
 @router.get("", response_model=list[PedidoRespuesta])
 def listar_pedidos(
-    db: Session = Depends(get_db), _usuario=Depends(get_current_user)
+    db: Session = Depends(get_db), _usuario=Depends(require_permission("PEDIDOS"))
 ) -> list[PedidoRespuesta]:
     """Devuelve todos los pedidos con cliente_nombre y producto_nombre.
 
@@ -128,7 +129,7 @@ def listar_pedidos(
 def crear_pedido(
     datos: PedidoCrear,
     db: Session = Depends(get_db),
-    _usuario=Depends(get_current_user),
+    _usuario=Depends(require_permission("PEDIDOS")),
 ) -> PedidoRespuesta:
     """Crea un nuevo pedido aplicando las reglas de negocio y lo devuelve (201).
 
@@ -200,7 +201,7 @@ def cambiar_estado(
     pedido_id: int,
     datos: CambiarEstadoRequest,
     db: Session = Depends(get_db),
-    _usuario=Depends(get_current_user),
+    _usuario=Depends(require_permission("PEDIDOS")),
 ) -> PedidoRespuesta:
     """Cambia el estado de un pedido validando el conjunto de valores permitidos.
 

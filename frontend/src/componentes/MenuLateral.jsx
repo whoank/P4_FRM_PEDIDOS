@@ -17,18 +17,67 @@
 //
 // Requerimientos: 1.1, 1.2, 1.3, 13.1
 
+import { useAuth } from '../auth/AuthContext.jsx'
+
 // Opciones principales del menu. El orden refleja el exigido por el Req. 1.1.
 // Los iconos son emojis/unicode simples para no agregar dependencias nuevas.
+//
+// Cada opcion incluye el campo `permission` con el codigo de permiso que la
+// habilita. 'inicio' es null (siempre visible: es la landing). El caso de
+// 'administracion' es especial (ver puedeVerOpcion mas abajo).
 export const OPCIONES_MENU = [
-  { id: 'inicio', etiqueta: 'Inicio', icono: '\u{1F3E0}' },        // casa
-  { id: 'clientes', etiqueta: 'Clientes', icono: '\u{1F465}' },    // dos personas
-  { id: 'productos', etiqueta: 'Productos', icono: '\u{1F4E6}' },  // caja
-  { id: 'pedidos', etiqueta: 'Pedidos', icono: '\u{1F9FE}' },      // recibo
-  { id: 'reporte', etiqueta: 'Reporte diario', icono: '\u{1F4CA}' }, // grafico
-  { id: 'administracion', etiqueta: 'Administración', icono: '\u{1F6E1}\u{FE0F}' }, // escudo
+  { id: 'inicio', etiqueta: 'Inicio', icono: '\u{1F3E0}', permission: null },        // casa
+  { id: 'clientes', etiqueta: 'Clientes', icono: '\u{1F465}', permission: 'CLIENTES' },    // dos personas
+  { id: 'productos', etiqueta: 'Productos', icono: '\u{1F4E6}', permission: 'PRODUCTOS' },  // caja
+  { id: 'pedidos', etiqueta: 'Pedidos', icono: '\u{1F9FE}', permission: 'PEDIDOS' },      // recibo
+  { id: 'reporte', etiqueta: 'Reporte diario', icono: '\u{1F4CA}', permission: 'REPORTE_DIARIO' }, // grafico
+  { id: 'administracion', etiqueta: 'Administración', icono: '\u{1F6E1}\u{FE0F}', permission: 'ADMINISTRACION' }, // escudo
 ]
 
+// -------------------------------------------------------------------------
+// Reglas centralizadas de permisos de navegacion.
+//
+// ESTE ES EL UNICO LUGAR donde viven las reglas de visibilidad/acceso por
+// seccion. Tanto el menu lateral (que oculta opciones) como App.jsx (que
+// bloquea el render de una seccion sin permiso) las reutilizan. Asi no se
+// duplican condicionales por toda la app.
+// -------------------------------------------------------------------------
+
+// Decide si una OPCION del menu debe verse, segun los permisos del usuario.
+//  - Opciones con permission === null: siempre visibles (p. ej. Inicio).
+//  - Administracion: caso especial. Se muestra si el usuario tiene
+//    ADMINISTRACION o alguna subseccion administrativa (USUARIOS o ROLES), para
+//    que un usuario con solo ROLES pueda entrar y ver la gestion de Roles.
+//  - El resto: visible si tiene el permiso correspondiente.
+export function puedeVerOpcion(opcion, hasPermission) {
+  if (opcion.id === 'administracion') {
+    return (
+      hasPermission('ADMINISTRACION') ||
+      hasPermission('USUARIOS') ||
+      hasPermission('ROLES')
+    )
+  }
+  return opcion.permission === null || hasPermission(opcion.permission)
+}
+
+// Version por id de seccion, para que App.jsx valide el acceso sin depender
+// del objeto opcion. Coherente con puedeVerOpcion (misma fuente de verdad).
+export function tienePermisoDeSeccion(id, hasPermission) {
+  const opcion = OPCIONES_MENU.find((o) => o.id === id)
+  // Una seccion desconocida no se bloquea aqui (App.jsx cae en Inicio).
+  if (!opcion) return true
+  return puedeVerOpcion(opcion, hasPermission)
+}
+
 export default function MenuLateral({ seccionActiva, onSeleccionar, onCerrarSesion }) {
+  // Permisos del usuario autenticado, desde el contexto de auth.
+  const { hasPermission } = useAuth()
+
+  // Solo se muestran las opciones permitidas (regla centralizada).
+  const opcionesVisibles = OPCIONES_MENU.filter((opcion) =>
+    puedeVerOpcion(opcion, hasPermission),
+  )
+
   return (
     <aside className="sidebar" aria-label="Menu lateral">
       {/* Marca: icono + nombre de la app, en la parte superior */}
@@ -44,7 +93,7 @@ export default function MenuLateral({ seccionActiva, onSeleccionar, onCerrarSesi
         {/* Etiqueta tenue de grupo */}
         <p className="sidebar__grupo-label">Menu</p>
 
-        {OPCIONES_MENU.map((opcion) => {
+        {opcionesVisibles.map((opcion) => {
           const activa = opcion.id === seccionActiva
           return (
             <button

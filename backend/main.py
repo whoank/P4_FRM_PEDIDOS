@@ -21,11 +21,16 @@ from models import crear_tablas
 # Seed idempotente del usuario inicial (modulo de autenticacion).
 from auth_service import crear_usuario_inicial
 
+# Seed idempotente de roles y permisos (modulo de autorizacion). Se usa junto a
+# create_all en vez de Alembic (decision del proyecto): siembra el catalogo de
+# permisos, el rol Administrador y lo asigna a los usuarios sin rol.
+from roles_service import seed_roles_y_permisos
+
 # Los cuatro routers ya definen su propio prefijo /api (por ejemplo
 # /api/clientes, /api/productos, /api/pedidos, /api/reporte-diario), asi que se
 # incluyen tal cual, sin anadir un prefijo adicional que duplicaria las rutas.
 # El router auth expone /auth/login, /auth/me y /auth/logout (sin prefijo /api).
-from routers import auth, clientes, pedidos, productos, reporte, usuarios
+from routers import auth, clientes, pedidos, productos, reporte, roles, usuarios
 
 
 # --- Ciclo de vida de la aplicacion (arranque / apagado) -------------------
@@ -54,6 +59,10 @@ async def lifespan(app: FastAPI):
     db = SessionLocal()
     try:
         crear_usuario_inicial(db)
+        # Tras el usuario inicial, sembramos roles y permisos (idempotente).
+        # Orden: crear_tablas() -> crear_usuario_inicial(db) -> seed_roles_y_permisos(db)
+        # para que el seed pueda asignar el rol Administrador tambien a juan123.
+        seed_roles_y_permisos(db)
     finally:
         db.close()
     # El "yield" separa el arranque (arriba) del apagado (abajo). No hay tareas
@@ -92,6 +101,9 @@ app.include_router(reporte.router)
 app.include_router(auth.router)
 # Router de gestion de usuarios (extension de Administracion): /api/usuarios.
 app.include_router(usuarios.router)
+# Router de gestion de roles y permisos (extension de Administracion):
+# /api/roles y /api/permisos.
+app.include_router(roles.router)
 
 
 # --- Endpoint de health-check ----------------------------------------------

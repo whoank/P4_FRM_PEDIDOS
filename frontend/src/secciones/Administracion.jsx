@@ -9,20 +9,34 @@
 // Reutiliza el patron visual de tarjetas/accesos (variables CSS de index.css).
 import { useState } from 'react'
 import GestionUsuarios from './GestionUsuarios.jsx'
+import Roles from './Roles.jsx'
+import { useAuth } from '../auth/AuthContext.jsx'
 import estilos from './Administracion.module.css'
 
-// Accesos del panel de Administracion. `id` identifica la sub-vista destino.
+// Accesos del panel de Administracion. `id` identifica la sub-vista destino y
+// `permiso` es el codigo requerido para verlo (se filtra por hasPermission).
 const ACCESOS = [
   {
     id: 'usuarios',
+    permiso: 'USUARIOS',
     icono: '\u{1F6E1}\u{FE0F}', // escudo
     titulo: 'Gestión de Usuarios',
     texto: 'Crea usuarios, controla su estado y cambia contraseñas.',
   },
+  {
+    id: 'roles',
+    permiso: 'ROLES',
+    icono: '\u{1F511}', // llave
+    titulo: 'Roles',
+    texto: 'Crea y administra roles y sus permisos.',
+  },
 ]
 
 export default function Administracion() {
-  // Sub-vista interna: 'panel' (por defecto) o 'usuarios'.
+  // Permisos del usuario, para filtrar los accesos del panel.
+  const { hasPermission } = useAuth()
+
+  // Sub-vista interna: 'panel' (por defecto), 'usuarios' o 'roles'.
   const [vista, setVista] = useState('panel')
 
   // Vista de usuarios: enlace para volver + gestion de usuarios.
@@ -42,6 +56,28 @@ export default function Administracion() {
     )
   }
 
+  // Vista de roles: enlace para volver + gestion de roles.
+  if (vista === 'roles') {
+    return (
+      <div className={estilos.administracion}>
+        <button
+          className={estilos.volver}
+          type="button"
+          onClick={() => setVista('panel')}
+        >
+          {'\u2190'} Volver a Administración
+        </button>
+
+        <Roles />
+      </div>
+    )
+  }
+
+  // Accesos visibles segun los permisos del usuario.
+  const accesosVisibles = ACCESOS.filter((acceso) =>
+    hasPermission(acceso.permiso),
+  )
+
   // Vista panel (por defecto): bienvenida + grid de accesos.
   return (
     <div className={estilos.administracion}>
@@ -59,7 +95,7 @@ export default function Administracion() {
         <h3 className={estilos.tituloAccesos}>Accesos</h3>
 
         <div className={estilos.accesos}>
-          {ACCESOS.map((acceso) => (
+          {accesosVisibles.map((acceso) => (
             <button
               key={acceso.id}
               type="button"
